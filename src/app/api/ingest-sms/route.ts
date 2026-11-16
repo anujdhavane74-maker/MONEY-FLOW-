@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
       rawText = await req.text();
     }
 
-    // 3. Timing-Safe Authentication
-    const authResult = authenticateApiRequest(req, rawText);
+    // 3. Timing-Safe Multi-Tenant Authentication (Per-User API Keys)
+    const authResult = await authenticateApiRequest(req, rawText);
     if (!authResult.authorized) {
       return NextResponse.json(
         {
@@ -85,10 +85,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 5. Build Standardized Transaction Record
+    // 5. Build Standardized Transaction Record (Multi-Tenant Isolated)
     const txnId = `txn-sms-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const effectiveUserId = authResult.userId && authResult.userId !== 'default-owner' ? authResult.userId : undefined;
+
     const newTxn: Transaction = {
       id: txnId,
+      userId: effectiveUserId,
       amount: parsed.amount ?? 0,
       type: parsed.type ?? 'expense',
       category: 'Uncategorized',
@@ -107,13 +110,14 @@ export async function POST(req: NextRequest) {
     // 6. Queue locally in memory
     queueWebhookTransaction(newTxn);
 
-    // 7. Persist to Supabase if configured
+    // 7. Persist to Supabase with strict user_id scoping if configured
     let supabaseSaved = false;
     const supabase = getServiceSupabase();
     if (supabase) {
       try {
         await supabase.from('webhook_queue').insert({
           id: newTxn.id,
+          user_id: effectiveUserId || null,
           payload: newTxn,
           synced: false,
           created_at: new Date().toISOString(),
@@ -121,6 +125,7 @@ export async function POST(req: NextRequest) {
 
         await supabase.from('transactions').upsert({
           id: newTxn.id,
+          user_id: effectiveUserId || null,
           amount: newTxn.amount,
           type: newTxn.type,
           category: newTxn.category,

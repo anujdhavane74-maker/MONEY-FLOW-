@@ -502,70 +502,114 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
   );
 }
 
-// Helpers for CSV / PDF data extraction
+// Helpers for CSV / PDF data extraction with Universal Auto-Mapping (GPay, Indian Banks, Revolut, Chase, Wise, Monzo)
 function parseGooglePayCsvRows(rows: any[]): Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>[] {
   const parsedList: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>[] = [];
 
   for (const row of rows) {
-    // Check possible column names
-    const rawAmount =
-      row['Amount'] ||
-      row['Amount (INR)'] ||
-      row['Transaction Amount'] ||
-      row['Debit'] ||
-      row['Credit'];
-    if (!rawAmount) continue;
+    if (!row || typeof row !== 'object') continue;
 
-    const amount = Math.abs(parseFloat(String(rawAmount).replace(/[^0-9.]/g, '')));
-    if (isNaN(amount) || amount <= 0) continue;
+    // 1. Column discovery helper (case-insensitive fuzzy key match)
+    const getVal = (...keys: string[]): string | undefined => {
+      for (const key of keys) {
+        const found = Object.keys(row).find((k) => k.trim().toLowerCase() === key.toLowerCase());
+        if (found && row[found] !== undefined && row[found] !== null && String(row[found]).trim() !== '') {
+          return String(row[found]).trim();
+        }
+      }
+      return undefined;
+    };
 
-    // Type detection
-    const rawType = String(
-      row['Type'] || row['Transaction Type'] || row['Status'] || ''
-    ).toLowerCase();
+    // 2. Amount & Type Detection (Handles separate Debit/Credit columns or single Amount)
+    const debitVal = getVal('debit', 'withdrawal', 'amount (debit)', 'paid out', 'spent');
+    const creditVal = getVal('credit', 'deposit', 'amount (credit)', 'paid in', 'received');
+    const genericAmount = getVal('amount', 'amount (inr)', 'transaction amount', 'total', 'net amount', 'value');
+
+    let amount = 0;
     let type: 'income' | 'expense' | 'savings' = 'expense';
-    if (
-      rawType.includes('received') ||
-      rawType.includes('credit') ||
-      parseFloat(String(rawAmount)) > 0 && String(rawAmount).includes('+')
-    ) {
+
+    if (debitVal && parseFloat(debitVal.replace(/[^0-9.]/g, '')) > 0) {
+      amount = parseFloat(debitVal.replace(/[^0-9.]/g, ''));
+      type = 'expense';
+    } else if (creditVal && parseFloat(creditVal.replace(/[^0-9.]/g, '')) > 0) {
+      amount = parseFloat(creditVal.replace(/[^0-9.]/g, ''));
       type = 'income';
+    } else if (genericAmount) {
+      const isExplicitNegative = genericAmount.startsWith('-') || genericAmount.includes('DR');
+      const isExplicitPositive = genericAmount.startsWith('+') || genericAmount.includes('CR');
+      amount = Math.abs(parseFloat(genericAmount.replace(/[^0-9.]/g, '')));
+
+      const rawType = getVal('type', 'transaction type', 'status', 'dr/cr', 'direction')?.toLowerCase() || '';
+      if (isExplicitPositive || rawType.includes('received') || rawType.includes('credit') || rawType === 'cr') {
+        type = 'income';
+      } else {
+        type = 'expense';
+      }
     }
 
-    // Counterparty / Merchant (Sanitized against XSS & Formula Injection)
+    if (isNaN(amount) || amount <= 0) continue;
+
+    // 3. Counterparty / Merchant Name
     const rawMerchant =
-      row['Description'] ||
-      row['To'] ||
-      row['From'] ||
-      row['Counterparty'] ||
-      row['Merchant'] ||
-      'Google Pay Counterparty';
+      getVal(
+        'description',
+        'narration',
+        'particulars',
+        'merchant',
+        'payee',
+        'counterparty',
+        'to',
+        'from',
+        'details',
+        'transaction details',
+        'name'
+      ) || 'Financial Counterparty';
+
     const cleanMerchant = sanitizeString(
-      cleanMerchantName(String(rawMerchant)).replace(/^[=+\-@\t\r]+/, '')
+      cleanMerchantName(rawMerchant).replace(/^[=+\-@\t\r]+/, '')
     );
 
-    // UPI Ref ID / Transaction ID
-    const upiRefId =
-      row['UPI Transaction ID'] ||
-      row['Transaction ID'] ||
-      row['Reference ID'] ||
-      row['UTR'] ||
-      undefined;
+    // 4. UPI Ref / Reference / Transaction ID
+    const upiRefId = getVal(
+      'upi transaction id',
+      'transaction id',
+      'reference id',
+      'utr',
+      'ref no',
+      'reference',
+      'chq / ref no',
+      'id'
+    );
 
-    // Date / Time
-    const rawDate = row['Date'] || row['Transaction Date'] || row['Time'];
-    const timestamp = rawDate ? new Date(rawDate).getTime() : Date.now();
+    // 5. Date / Time Parsing
+    const rawDate = getVal(
+      'date',
+      'transaction date',
+      'posting date',
+      'value date',
+      'time',
+      'timestamp',
+      'booking date',
+      'completed date'
+    );
+    let timestamp = Date.now();
+    if (rawDate) {
+      const parsedTs = new Date(rawDate).getTime();
+      if (!isNaN(parsedTs) && parsedTs > 946684800000) {
+        timestamp = parsedTs;
+      }
+    }
 
     parsedList.push({
       amount,
       type,
       category: 'Uncategorized',
       merchant: cleanMerchant || 'Unknown Merchant',
-      rawMerchant: sanitizeString(String(rawMerchant)),
-      upiRefId: upiRefId ? sanitizeString(String(upiRefId)).slice(0, 50) : undefined,
-      timestamp: isNaN(timestamp) ? Date.now() : timestamp,
+      rawMerchant: sanitizeString(rawMerchant).slice(0, 120),
+      upiRefId: upiRefId ? sanitizeString(upiRefId).slice(0, 50) : undefined,
+      timestamp,
       source: 'gpay_csv',
-      bankOrApp: 'Google Pay',
+      bankOrApp: 'Statement Import',
       isCategorized: false,
     });
   }

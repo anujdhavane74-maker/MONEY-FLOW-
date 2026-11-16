@@ -53,10 +53,50 @@ export class MoneyFlowDatabase extends Dexie {
       quick_presets: 'id, name, amount',
       recurring_bills: 'id, title, nextDueDate, isActive, category',
     });
+
+    this.version(4).stores({
+      transactions: 'id, userId, type, category, timestamp, upiRefId, merchant, isCategorized, source, createdAt, [userId+timestamp]',
+      categories: 'id, userId, type, name, isDefault',
+      merchant_rules: 'id, userId, keyword, categoryId',
+      savings_goals: 'id, userId, title, createdAt',
+      app_settings: 'id, userId',
+      ious: 'id, userId, transactionId, personName, status, createdAt',
+      quick_presets: 'id, userId, name, amount',
+      recurring_bills: 'id, userId, title, nextDueDate, isActive, category',
+    });
   }
 }
 
 export const db = new MoneyFlowDatabase();
+
+/**
+ * Wipes all local IndexedDB tables and credentials on user sign-out to prevent data leaks.
+ */
+export async function wipeLocalDatabaseOnSignOut() {
+  if (typeof window === 'undefined') return;
+
+  try {
+    await db.transactions.clear();
+    await db.ious.clear();
+    await db.recurring_bills.clear();
+    await db.savings_goals.clear();
+    await db.quick_presets.clear();
+    await db.merchant_rules.clear();
+    await db.app_settings.clear();
+    await db.categories.clear();
+
+    sessionStorage.clear();
+    localStorage.removeItem('mf_unlocked_at');
+    localStorage.removeItem('mf_last_active');
+    localStorage.removeItem('mf_session_sig');
+    localStorage.removeItem('mf_demo_seeded');
+    localStorage.removeItem('mf_biometric_cred_id');
+    localStorage.removeItem('mf_biometric_enabled');
+    localStorage.removeItem('mf_current_user_id');
+  } catch (err) {
+    console.error('Failed to wipe local database on sign out:', err);
+  }
+}
 
 // Default seed categories
 export const DEFAULT_CATEGORIES: Category[] = [

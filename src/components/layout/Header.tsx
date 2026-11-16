@@ -16,11 +16,13 @@ import {
   LayoutDashboard,
   Receipt,
   PiggyBank,
+  TrendingUp,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { promptPWAInstall, isPWAInstalled } from '@/lib/pwa';
 import { useTheme, Theme } from '@/lib/theme';
 import { TabType } from '@/components/layout/BottomNav';
+import { getActiveCurrency } from '@/lib/formatters';
 
 interface HeaderProps {
   onLockApp: () => void;
@@ -84,6 +86,8 @@ export function Header({
     }
   };
 
+  const curProfile = getActiveCurrency();
+
   const navItems: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
     {
@@ -100,7 +104,8 @@ export function Header({
         </span>
       ),
     },
-    { id: 'savings', label: 'Savings', icon: <PiggyBank className="w-4 h-4" /> },
+    { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" /> },
+    { id: 'savings', label: 'Goals', icon: <PiggyBank className="w-4 h-4" /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon className="w-4 h-4" /> },
   ];
 
@@ -111,7 +116,9 @@ export function Header({
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="relative shrink-0">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 flex items-center justify-center shadow-xs">
-              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base sm:text-lg font-mono">₹</span>
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base sm:text-lg font-mono">
+                {curProfile.symbol}
+              </span>
             </div>
             <span
               className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-slate-950 ${

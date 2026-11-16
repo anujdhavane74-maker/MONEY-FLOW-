@@ -4,6 +4,9 @@ import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { BottomNav, TabType } from '@/components/layout/BottomNav';
+import { DesktopSidebar } from '@/components/layout/DesktopSidebar';
+import { CommandPaletteModal } from '@/components/layout/CommandPaletteModal';
+import { AnalyticsView } from '@/components/analytics/AnalyticsView';
 import { SummaryCards } from '@/components/dashboard/SummaryCards';
 import { FinancialCharts } from '@/components/dashboard/FinancialCharts';
 import { RecentTransactions } from '@/components/dashboard/RecentTransactions';
@@ -44,6 +47,7 @@ import {
   recordUserActivity,
   clearUnlockSession,
 } from '@/lib/sessionAuth';
+import { setActiveCurrency } from '@/lib/formatters';
 import { Sparkles, MessageSquareText, ShieldAlert } from 'lucide-react';
 
 function DashboardContent() {
@@ -71,6 +75,7 @@ function DashboardContent() {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showPinSettingsModal, setShowPinSettingsModal] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [activePromptTxn, setActivePromptTxn] = useState<Transaction | null>(null);
 
   // Settlement Hook Modal
@@ -82,6 +87,10 @@ function DashboardContent() {
       await initializeDatabase();
       const currentSettings = await db.app_settings.get('global');
       setSettings(currentSettings || null);
+
+      if (currentSettings?.currency) {
+        setActiveCurrency(currentSettings.currency);
+      }
 
       // Verify Google Pay-style persistent unlock session
       if (currentSettings?.pinEnabled && currentSettings?.pinHash) {
@@ -180,6 +189,18 @@ function DashboardContent() {
       }
     }
   }, [searchParams, transactions]);
+
+  // Global Cmd/Ctrl+K Quick Command Palette Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Google Pay-Style Inactivity & Background Auto-Lock Tracker
   useEffect(() => {
@@ -314,24 +335,41 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors w-full max-w-full overflow-x-clip min-w-0">
-      {/* Top Header */}
-      <Header
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:flex-row transition-colors w-full max-w-full overflow-x-clip min-w-0">
+      {/* Desktop Sidebar (visible on lg: >=1024px) */}
+      <DesktopSidebar
+        activeTab={activeTab}
+        onChangeTab={(t) => setActiveTab(t)}
+        onOpenAddModal={() => setShowAddModal(true)}
+        onOpenVoiceModal={() => setShowVoiceModal(true)}
+        onOpenImportModal={() => setShowImportModal(true)}
+        onOpenCommandPalette={() => setShowCommandPalette(true)}
         onLockApp={() => {
           clearUnlockSession();
           setIsLocked(true);
         }}
-        isPinEnabled={Boolean(settings?.pinEnabled && settings?.pinHash)}
-        onOpenPinSettings={() => setShowPinSettingsModal(true)}
-        onOpenParentShare={() => setActiveTab('settings')}
-        onOpenVoiceModal={() => setShowVoiceModal(true)}
         uncategorizedCount={uncategorizedCount}
-        activeTab={activeTab}
-        onChangeTab={(t) => setActiveTab(t)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-12 space-y-4 sm:space-y-6 overflow-x-clip min-w-0">
+      {/* Main App Canvas */}
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-clip">
+        {/* Top Header */}
+        <Header
+          onLockApp={() => {
+            clearUnlockSession();
+            setIsLocked(true);
+          }}
+          isPinEnabled={Boolean(settings?.pinEnabled && settings?.pinHash)}
+          onOpenPinSettings={() => setShowPinSettingsModal(true)}
+          onOpenParentShare={() => setActiveTab('settings')}
+          onOpenVoiceModal={() => setShowVoiceModal(true)}
+          uncategorizedCount={uncategorizedCount}
+          activeTab={activeTab}
+          onChangeTab={(t) => setActiveTab(t)}
+        />
+
+        {/* Main Content Area */}
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-12 space-y-4 sm:space-y-6 overflow-x-clip min-w-0">
         {/* Uncategorized Prompt Notification Banner */}
         {uncategorizedCount > 0 && (
           <div className="p-3 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between gap-3 text-xs animate-fade-in shadow-xs min-w-0">
@@ -425,14 +463,27 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Tab 3: Savings Goals */}
+        {/* Tab 3: Analytics & Trends */}
+        {activeTab === 'analytics' && (
+          <div className="min-w-0 w-full">
+            <AnalyticsView
+              transactions={transactions}
+              categories={categories}
+              bills={bills}
+              ious={ious}
+              monthlyBudget={settings?.monthlyBudget}
+            />
+          </div>
+        )}
+
+        {/* Tab 4: Savings Goals */}
         {activeTab === 'savings' && (
           <div className="min-w-0 w-full">
             <SavingsGoalsView goals={savingsGoals} onRefresh={loadData} />
           </div>
         )}
 
-        {/* Tab 4: Settings & Parent Links */}
+        {/* Tab 5: Settings & Parent Links */}
         {activeTab === 'settings' && (
           <div className="min-w-0 w-full">
             <SettingsView
@@ -450,6 +501,7 @@ function DashboardContent() {
           </div>
         )}
       </main>
+      </div>
 
       {/* Bottom Navigation */}
       <BottomNav
@@ -533,6 +585,22 @@ function DashboardContent() {
           onSettled={loadData}
         />
       )}
+
+      {/* Modal: Global Cmd/Ctrl+K Command Palette */}
+      <CommandPaletteModal
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onNavigate={(tab) => setActiveTab(tab)}
+        onOpenAdd={() => setShowAddModal(true)}
+        onOpenVoice={() => setShowVoiceModal(true)}
+        onOpenImport={() => setShowImportModal(true)}
+        onOpenQuickPaste={() => setShowQuickPasteModal(true)}
+        onLockApp={() => {
+          clearUnlockSession();
+          setIsLocked(true);
+        }}
+        transactions={transactions}
+      />
     </div>
   );
 }

@@ -83,7 +83,20 @@ CREATE TABLE IF NOT EXISTS ious (
   settled_at TIMESTAMPTZ
 );
 
--- 6. Webhook Ingestion Queue
+-- 6. User API Keys Table (Per-user MacroDroid/Tasker Webhook Routing)
+CREATE TABLE IF NOT EXISTS user_api_keys (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  api_key TEXT NOT NULL UNIQUE,
+  label TEXT DEFAULT 'MacroDroid Phone Key',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_api_keys_key ON user_api_keys (api_key);
+CREATE INDEX IF NOT EXISTS idx_user_api_keys_user ON user_api_keys (user_id);
+
+-- 7. Webhook Ingestion Queue
 CREATE TABLE IF NOT EXISTS webhook_queue (
   id TEXT PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -93,9 +106,36 @@ CREATE TABLE IF NOT EXISTS webhook_queue (
 );
 
 CREATE INDEX IF NOT EXISTS idx_webhook_queue_synced ON webhook_queue (synced);
+CREATE INDEX IF NOT EXISTS idx_webhook_queue_user ON webhook_queue (user_id);
+
+-- 8. Categories Table (Cloud Sync)
+CREATE TABLE IF NOT EXISTS categories (
+  id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  icon TEXT,
+  color TEXT,
+  budget_monthly NUMERIC,
+  is_default BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 9. Savings Goals Table (Cloud Sync)
+CREATE TABLE IF NOT EXISTS savings_goals (
+  id TEXT PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  target_amount NUMERIC NOT NULL,
+  current_amount NUMERIC DEFAULT 0,
+  deadline TEXT,
+  icon TEXT,
+  color TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 -- ==============================================================================
--- Hardened Row-Level Security (RLS) Policies
+-- Hardened Multi-Tenant Row-Level Security (RLS) Policies
 -- ==============================================================================
 
 ALTER TABLE app_settings ENABLE ROW LEVEL SECURITY;
@@ -103,7 +143,10 @@ ALTER TABLE parent_share_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recurring_bills ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ious ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_api_keys ENABLE ROW LEVEL SECURITY;
 ALTER TABLE webhook_queue ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE savings_goals ENABLE ROW LEVEL SECURITY;
 
 -- Drop previous open policies if updating
 DROP POLICY IF EXISTS "Allow public read-write for app_settings" ON app_settings;
@@ -112,13 +155,21 @@ DROP POLICY IF EXISTS "Allow public read-write for transactions" ON transactions
 DROP POLICY IF EXISTS "Allow public read-write for recurring_bills" ON recurring_bills;
 DROP POLICY IF EXISTS "Allow public read-write for ious" ON ious;
 DROP POLICY IF EXISTS "Allow public read-write for webhook_queue" ON webhook_queue;
+DROP POLICY IF EXISTS "Owner access for app_settings" ON app_settings;
+DROP POLICY IF EXISTS "Owner manage share tokens" ON parent_share_tokens;
+DROP POLICY IF EXISTS "Public read active tokens" ON parent_share_tokens;
+DROP POLICY IF EXISTS "Owner access for transactions" ON transactions;
+DROP POLICY IF EXISTS "Owner access for recurring_bills" ON recurring_bills;
+DROP POLICY IF EXISTS "Owner access for ious" ON ious;
+DROP POLICY IF EXISTS "Owner access for webhook_queue" ON webhook_queue;
+DROP POLICY IF EXISTS "Ingestion write to webhook_queue" ON webhook_queue;
 
--- 1. App Settings: Service role or Authenticated owner
+-- 1. App Settings: Authenticated owner or service role
 CREATE POLICY "Owner access for app_settings" ON app_settings
   FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
   WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
 
--- 2. Parent Share Tokens: Owner full access; Public can check active tokens
+-- 2. Parent Share Tokens: Owner full access; Public can check active non-revoked tokens
 CREATE POLICY "Public read active tokens" ON parent_share_tokens
   FOR SELECT USING (revoked = false);
 
@@ -126,25 +177,40 @@ CREATE POLICY "Owner manage share tokens" ON parent_share_tokens
   FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
   WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
 
--- 3. Transactions: Owner full access
+-- 3. Transactions: Owner isolated access
 CREATE POLICY "Owner access for transactions" ON transactions
   FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
   WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
 
--- 4. Recurring Bills: Owner full access
+-- 4. Recurring Bills: Owner isolated access
 CREATE POLICY "Owner access for recurring_bills" ON recurring_bills
   FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
   WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
 
--- 5. IOUs: Owner full access
+-- 5. IOUs: Owner isolated access
 CREATE POLICY "Owner access for ious" ON ious
   FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
   WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
 
--- 6. Webhook Queue: Ingestion write access & owner read/update
+-- 6. User API Keys: Owner isolated access
+CREATE POLICY "Owner access for user_api_keys" ON user_api_keys
+  FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
+  WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
+
+-- 7. Webhook Queue: Ingestion write access & owner queue fetch
 CREATE POLICY "Ingestion write to webhook_queue" ON webhook_queue
   FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Owner access for webhook_queue" ON webhook_queue
+  FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
+  WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
+
+-- 8. Categories: Owner isolated access
+CREATE POLICY "Owner access for categories" ON categories
+  FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
+  WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);
+
+-- 9. Savings Goals: Owner isolated access
+CREATE POLICY "Owner access for savings_goals" ON savings_goals
   FOR ALL USING (auth.uid() IS NULL OR auth.uid() = user_id)
   WITH CHECK (auth.uid() IS NULL OR auth.uid() = user_id);

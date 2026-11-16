@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import crypto from 'crypto';
+import { getServiceSupabase } from './supabase';
 
 /**
  * Timing-safe string comparison to prevent timing attacks on API keys and tokens.
@@ -48,34 +49,13 @@ export function verifyHmacSignature(
 }
 
 /**
- * Authenticates an incoming NextRequest using timing-safe comparison.
+ * Authenticates an incoming NextRequest using per-user Supabase API keys with fallback to server secret.
  */
-export function authenticateApiRequest(
+export async function authenticateApiRequest(
   req: NextRequest,
   rawBody?: string
-): { authorized: boolean; reason?: string } {
-  const secret = getAuthorizedWebhookSecret();
-
-  if (!secret) {
-    return {
-      authorized: false,
-      reason: 'Server configuration error: INGEST_WEBHOOK_SECRET is not configured on server.',
-    };
-  }
-
-  // 1. Check HMAC signature if provided
-  const hmacHeader =
-    req.headers.get('x-signature-sha256') ||
-    req.headers.get('x-hub-signature-256') ||
-    req.headers.get('x-webhook-signature');
-
-  if (hmacHeader && rawBody) {
-    if (verifyHmacSignature(rawBody, hmacHeader, secret)) {
-      return { authorized: true };
-    }
-  }
-
-  // 2. Check X-API-Key or Authorization header
+): Promise<{ authorized: boolean; userId?: string; reason?: string }> {
+  // 1. Extract API key from Authorization header, X-API-Key, or query param
   const authHeader = req.headers.get('authorization') || req.headers.get('x-api-key');
   const { searchParams } = new URL(req.url);
   const queryKey = searchParams.get('apiKey');
@@ -83,8 +63,58 @@ export function authenticateApiRequest(
   let clientKey = authHeader || queryKey;
   if (clientKey) {
     clientKey = clientKey.replace(/^Bearer\s+/i, '').trim();
-    if (timingSafeEqualString(clientKey, secret)) {
-      return { authorized: true };
+  }
+
+  // 2. Check per-user API keys in Supabase (Multi-tenant routing)
+  const supabase = getServiceSupabase();
+  if (supabase && clientKey) {
+    try {
+      // Check user_api_keys table
+      const { data: keyRecord } = await supabase
+        .from('user_api_keys')
+        .select('user_id')
+        .eq('api_key', clientKey)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (keyRecord && keyRecord.user_id) {
+        return { authorized: true, userId: keyRecord.user_id };
+      }
+
+      // Check app_settings table
+      const { data: settingsRecord } = await supabase
+        .from('app_settings')
+        .select('user_id')
+        .eq('api_key', clientKey)
+        .maybeSingle();
+
+      if (settingsRecord && settingsRecord.user_id) {
+        return { authorized: true, userId: settingsRecord.user_id };
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Per-user API key lookup warning:', err);
+      }
+    }
+  }
+
+  // 3. Fallback: Check server-level webhook secret for single-tenant / demo usage
+  const secret = getAuthorizedWebhookSecret();
+  if (secret) {
+    // Check HMAC signature if provided
+    const hmacHeader =
+      req.headers.get('x-signature-sha256') ||
+      req.headers.get('x-hub-signature-256') ||
+      req.headers.get('x-webhook-signature');
+
+    if (hmacHeader && rawBody) {
+      if (verifyHmacSignature(rawBody, hmacHeader, secret)) {
+        return { authorized: true, userId: 'default-owner' };
+      }
+    }
+
+    if (clientKey && timingSafeEqualString(clientKey, secret)) {
+      return { authorized: true, userId: 'default-owner' };
     }
   }
 

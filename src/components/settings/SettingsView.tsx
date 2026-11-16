@@ -20,6 +20,10 @@ import {
   Laptop,
   Palette,
   Fingerprint,
+  Globe,
+  User,
+  LogOut,
+  CheckCircle2,
 } from 'lucide-react';
 import { AppSettings, MerchantRule, Category, Transaction } from '@/lib/types';
 import { db } from '@/lib/db';
@@ -28,6 +32,8 @@ import { isBiometricEnrolled } from '@/lib/sessionAuth';
 import { MacroDroidGuideModal } from './MacroDroidGuideModal';
 import { DataBackupCard } from './DataBackupCard';
 import { useTheme, Theme } from '@/lib/theme';
+import { useAuth } from '@/lib/authContext';
+import { CURRENCY_LIST, CurrencyCode, setActiveCurrency, getActiveCurrency } from '@/lib/formatters';
 
 interface SettingsViewProps {
   settings: AppSettings | null;
@@ -46,10 +52,11 @@ export const SettingsView = memo(function SettingsView({
   onRefresh,
   onSimulateWebhook,
 }: SettingsViewProps) {
-  const [activeTab, setActiveTab] = useState<'security' | 'share' | 'webhook' | 'rules' | 'data'>(
-    'security'
+  const [activeTab, setActiveTab] = useState<'account' | 'security' | 'share' | 'webhook' | 'rules' | 'data'>(
+    'account'
   );
 
+  const { user, signOut, isConfigured } = useAuth();
   const { theme, setTheme } = useTheme();
 
   // Parent Link Creator State
@@ -187,6 +194,7 @@ export const SettingsView = memo(function SettingsView({
       {/* Settings Navigation Tabs */}
       <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800 w-full max-w-full min-w-0 snap-x">
         {[
+          { key: 'account', label: 'Account & Currency', icon: Globe },
           { key: 'security', label: 'Security & PIN', icon: KeyRound },
           { key: 'share', label: 'Parent Links', icon: Share2 },
           { key: 'webhook', label: 'SMS Webhook', icon: Smartphone },
@@ -212,6 +220,100 @@ export const SettingsView = memo(function SettingsView({
           );
         })}
       </div>
+
+      {/* 0. Account & Multi-Currency Tab */}
+      {activeTab === 'account' && (
+        <div className="space-y-4 sm:space-y-6">
+          {/* User Account / Multi-Tenant Session Card */}
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-4 transition-colors min-w-0 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-extrabold text-base shrink-0">
+                  {user?.email ? user.email.slice(0, 2).toUpperCase() : <User className="w-5 h-5" />}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">
+                    {user?.email || 'Offline Guest Vault'}
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {user
+                      ? `Multi-tenant cloud account • ID: ${user.id.slice(0, 8)}...`
+                      : 'Local storage session. Create an account to sync across devices.'}
+                  </p>
+                </div>
+              </div>
+
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('Sign out from Money Flow on this device? Your local cache will be cleared safely.')) {
+                      signOut();
+                    }
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-semibold text-xs flex items-center gap-1.5 transition-colors shrink-0 self-start sm:self-auto"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              ) : (
+                <a
+                  href="/login"
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm shrink-0 self-start sm:self-auto"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Sign In / Register</span>
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Active Global Currency Selector */}
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-4 transition-colors min-w-0 w-full">
+            <div>
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Globe className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                Active Global Currency
+              </h2>
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Switch currencies dynamically. All Safe-to-Spend limits, charts, and transaction feeds adapt instantly.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+              {CURRENCY_LIST.map((cur) => {
+                const currentCode = settings?.currency || 'INR';
+                const isSelected = currentCode === cur.code;
+                return (
+                  <button
+                    key={cur.code}
+                    type="button"
+                    onClick={async () => {
+                      setActiveCurrency(cur.code);
+                      await db.app_settings.update('global', { currency: cur.code });
+                      onRefresh();
+                    }}
+                    className={`p-3 rounded-2xl border text-left transition-all ${
+                      isSelected
+                        ? 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500 text-slate-900 dark:text-white ring-1 ring-emerald-500 shadow-xs'
+                        : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-base font-mono font-extrabold text-emerald-600 dark:text-emerald-400">
+                        {cur.symbol}
+                      </span>
+                      {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+                    </div>
+                    <p className="text-xs font-bold leading-tight truncate">{cur.name}</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">{cur.code}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 1. Security & PIN Tab */}
       {activeTab === 'security' && (

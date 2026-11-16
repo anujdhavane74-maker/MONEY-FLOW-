@@ -10,20 +10,21 @@ export interface SplitFriend {
 
 export interface Transaction {
   id: string;
+  userId?: string;
   amount: number; // NOTE: if split, this represents MY personal share, keeping spending charts accurate!
   type: TransactionType;
   category: string; // Category name or ID
   merchant: string;
   rawMerchant?: string;
   upiRefId?: string; // 12-digit UTR or Transaction ID
-  timestamp: number; // Milliseconds timestamp (IST)
+  timestamp: number; // Milliseconds timestamp
   source: TransactionSource;
-  bankOrApp?: string; // e.g. 'GPay', 'PhonePe', 'HDFC', 'SBI', 'Bank of Maharashtra'
+  bankOrApp?: string; // e.g. 'GPay', 'PhonePe', 'HDFC', 'SBI', 'Bank of Maharashtra', 'Chase', 'Revolut'
   notes?: string;
   isCategorized: boolean; // Flag to trigger instant categorization modal
   isSplit?: boolean;
-  splitTotalAmount?: number; // Total bill paid at the counter (e.g. ₹600)
-  myShareAmount?: number; // My personal share (e.g. ₹200)
+  splitTotalAmount?: number; // Total bill paid at the counter
+  myShareAmount?: number; // My personal share
   splitFriends?: SplitFriend[];
   createdAt: number;
   updatedAt: number;
@@ -31,6 +32,7 @@ export interface Transaction {
 
 export interface IOU {
   id: string;
+  userId?: string;
   transactionId?: string;
   personName: string;
   amount: number;
@@ -43,6 +45,7 @@ export interface IOU {
 
 export interface QuickSpendPreset {
   id: string;
+  userId?: string;
   name: string;
   amount: number;
   category: string;
@@ -51,6 +54,7 @@ export interface QuickSpendPreset {
 
 export interface RecurringBill {
   id: string;
+  userId?: string;
   title: string;
   amount: number;
   category: string;
@@ -63,6 +67,7 @@ export interface RecurringBill {
 
 export interface Category {
   id: string;
+  userId?: string;
   name: string;
   type: TransactionType;
   icon: string; // Lucide icon key
@@ -73,6 +78,7 @@ export interface Category {
 
 export interface MerchantRule {
   id: string;
+  userId?: string;
   keyword: string; // Normalized lowercase merchant/UPI keyword
   categoryId: string; // Category to auto-assign
   confidence: number; // 0 to 1
@@ -81,6 +87,7 @@ export interface MerchantRule {
 
 export interface SavingsGoal {
   id: string;
+  userId?: string;
   title: string;
   targetAmount: number;
   currentAmount: number;
@@ -92,26 +99,39 @@ export interface SavingsGoal {
 
 export interface ParentShareToken {
   token: string;
+  userId?: string;
   label: string;
   createdAt: number;
   expiresAt?: number;
   revoked: boolean;
 }
 
+export interface UserApiKey {
+  id: string;
+  userId: string;
+  apiKey: string;
+  label: string;
+  isActive: boolean;
+  createdAt: number;
+}
+
 export interface AppSettings {
-  id: string; // always 'global'
+  id: string; // 'global' or user_id
+  userId?: string;
   pinHash: string | null;
   pinEnabled: boolean;
-  autoLockMinutes: number; // Default: 5 minutes
-  currency: string; // Default: 'INR'
+  autoLockMinutes: number; // Default: 5 minutes (0 = Never)
+  currency: string; // Default: 'INR', supports 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'JPY'
+  locale?: string; // Default: 'en-IN'
   theme: 'dark' | 'light' | 'system';
-  monthlyBudget: number; // Default: ₹25,000 for Safe-to-Spend formula
+  monthlyBudget: number; // Default: 25000
   fixedRecurringBills: number; // Summed from active recurring bills or fallback
   apiKey: string; // X-API-Key for MacroDroid/Tasker Webhook
   hideNotesFromParent: boolean; // Privacy setting for Parent Guardian View
   parentShareTokens: ParentShareToken[];
   lastActive: number;
   webhookSecret?: string;
+  onboarded?: boolean;
 }
 
 export interface ParsedSmsResult {

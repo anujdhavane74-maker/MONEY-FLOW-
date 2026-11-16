@@ -11,9 +11,10 @@ import {
   MessageSquareText,
   X,
   Mic,
+  TrendingUp,
 } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'transactions' | 'savings' | 'settings';
+export type TabType = 'dashboard' | 'transactions' | 'analytics' | 'savings' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -187,18 +188,18 @@ export function BottomNav({
             </button>
           </div>
 
-          {/* 4. Goals Tab */}
+          {/* 4. Analytics / Trends Tab */}
           <button
             type="button"
-            onClick={() => onChangeTab('savings')}
+            onClick={() => onChangeTab('analytics')}
             className={`flex flex-col items-center justify-center min-h-[44px] py-1 transition-all ${
-              activeTab === 'savings'
+              activeTab === 'analytics'
                 ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
-            <PiggyBank className="w-5 h-5" />
-            <span className="text-[11px] mt-0.5">Goals</span>
+            <TrendingUp className="w-5 h-5" />
+            <span className="text-[11px] mt-0.5">Trends</span>
           </button>
 
           {/* 5. Settings Tab */}

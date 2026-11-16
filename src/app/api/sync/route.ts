@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 2. Authentication Check (Timing-Safe)
-    const authResult = authenticateApiRequest(req);
+    // 2. Authentication Check (Timing-Safe Multi-Tenant)
+    const authResult = await authenticateApiRequest(req);
     if (!authResult.authorized) {
       return NextResponse.json(
         { success: false, error: authResult.reason || 'Unauthorized access.' },
@@ -74,11 +74,17 @@ export async function GET(req: NextRequest) {
     const supabase = getServiceSupabase();
     if (supabase) {
       try {
-        const { data } = await supabase
+        let query = supabase
           .from('webhook_queue')
           .select('payload')
           .eq('synced', false)
           .limit(100);
+
+        if (authResult.userId && authResult.userId !== 'default-owner') {
+          query = query.eq('user_id', authResult.userId);
+        }
+
+        const { data } = await query;
 
         if (data && Array.isArray(data)) {
           const fromSupabase = data.map((row) => row.payload as Transaction);
@@ -132,8 +138,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Authentication Check (Timing-Safe)
-    const authResult = authenticateApiRequest(req);
+    // 2. Authentication Check (Timing-Safe Multi-Tenant)
+    const authResult = await authenticateApiRequest(req);
     if (!authResult.authorized) {
       return NextResponse.json(
         { success: false, error: authResult.reason || 'Unauthorized access.' },
@@ -171,16 +177,18 @@ export async function POST(req: NextRequest) {
       lastSyncedAt: Date.now(),
     });
 
-    // 5. If Supabase configured, batch upsert securely
+    // 5. If Supabase configured, batch upsert securely with user_id multi-tenant isolation
     const supabase = getServiceSupabase();
     let supabaseSynced = false;
+    const effectiveUserId = authResult.userId && authResult.userId !== 'default-owner' ? authResult.userId : null;
 
     if (supabase) {
       try {
         // Upsert Settings
         if (settings) {
           await supabase.from('app_settings').upsert({
-            id: 'global',
+            id: effectiveUserId || 'global',
+            user_id: effectiveUserId,
             monthly_budget: settings.monthlyBudget,
             fixed_recurring_bills: settings.fixedRecurringBills,
             hide_notes_from_parent: settings.hideNotesFromParent,
@@ -193,6 +201,7 @@ export async function POST(req: NextRequest) {
         if (parentShareTokens && parentShareTokens.length > 0) {
           const tokenRows = parentShareTokens.map((t) => ({
             token: t.token,
+            user_id: effectiveUserId,
             label: t.label,
             revoked: Boolean(t.revoked),
             created_at: t.createdAt ? new Date(t.createdAt).toISOString() : new Date().toISOString(),
@@ -204,6 +213,7 @@ export async function POST(req: NextRequest) {
         if (transactions && transactions.length > 0) {
           const txnRows = transactions.map((t) => ({
             id: t.id,
+            user_id: effectiveUserId,
             amount: t.amount,
             type: t.type,
             category: t.category,
@@ -233,6 +243,7 @@ export async function POST(req: NextRequest) {
         if (recurringBills && recurringBills.length > 0) {
           const billRows = recurringBills.map((b) => ({
             id: b.id,
+            user_id: effectiveUserId,
             title: b.title,
             amount: b.amount,
             category: b.category,
@@ -249,6 +260,7 @@ export async function POST(req: NextRequest) {
         if (ious && ious.length > 0) {
           const iouRows = ious.map((item) => ({
             id: item.id,
+            user_id: effectiveUserId,
             transaction_id: item.transactionId || null,
             person_name: item.personName,
             amount: item.amount,
