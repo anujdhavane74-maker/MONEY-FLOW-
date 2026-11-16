@@ -5,10 +5,8 @@ import {
   MessageSquareText,
   X,
   Sparkles,
-  ArrowRight,
   CheckCircle2,
   AlertCircle,
-  Copy,
 } from 'lucide-react';
 import { parseIndianFinancialSms } from '@/lib/smsParser';
 import { formatINR } from '@/lib/formatters';
@@ -66,14 +64,13 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
       source: 'sms',
       bankOrApp: parsed.bankOrApp,
       notes: 'Ingested via SMS parser',
-      isCategorized: false, // will trigger 1-tap categorization prompt
+      isCategorized: false,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
 
     await db.transactions.add(newTxn);
 
-    // Trigger Web Push Notification
     triggerCategorizationNotification({
       amount: newTxn.amount,
       merchant: newTxn.merchant,
@@ -86,27 +83,27 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 text-slate-100 flex flex-col max-h-[92vh] overflow-y-auto space-y-4"
+        className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 flex flex-col max-h-[92vh] overflow-y-auto space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+            <div className="w-10 h-10 rounded-2xl bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
               <MessageSquareText className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Bank SMS / Notification Ingest</h2>
-              <p className="text-xs text-slate-400">Paste raw SMS to auto-extract transaction</p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Bank SMS / Notification Ingest</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Paste raw SMS to auto-extract transaction</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -114,7 +111,7 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
 
         {/* Quick Sample Fill Buttons */}
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2 block">
             Click to Test Sample Bank SMS:
           </span>
           <div className="grid grid-cols-2 gap-2">
@@ -126,7 +123,7 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
                   setSmsText(tmpl.text);
                   setError('');
                 }}
-                className="p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-left text-xs font-medium text-slate-300 hover:text-cyan-300 transition-colors truncate"
+                className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-left text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors truncate"
               >
                 {tmpl.label}
               </button>
@@ -136,7 +133,7 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
 
         {/* SMS Textarea */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider block">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
             Raw SMS / Notification Text:
           </label>
           <textarea
@@ -147,7 +144,7 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
               setError('');
             }}
             placeholder="Paste your bank or UPI debit/credit message here..."
-            className="w-full p-3 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 leading-relaxed"
+            className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-500 leading-relaxed"
           />
         </div>
 
@@ -156,48 +153,48 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
           <div
             className={`p-4 rounded-2xl border text-xs space-y-2 ${
               parsed.success
-                ? 'bg-emerald-950/20 border-emerald-800/50 text-emerald-200'
-                : 'bg-rose-950/20 border-rose-800/50 text-rose-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-800/50 dark:text-emerald-200'
+                : 'bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/20 dark:border-rose-800/50 dark:text-rose-300'
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="font-bold flex items-center gap-1.5">
                 {parsed.success ? (
                   <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                     Regex Parser Match
                   </>
                 ) : (
                   <>
-                    <AlertCircle className="w-4 h-4 text-rose-400" />
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                     Parsing Error
                   </>
                 )}
               </span>
               {parsed.success && parsed.amount && (
-                <span className="font-black font-mono text-base text-emerald-300">
+                <span className="font-black font-mono text-base text-emerald-700 dark:text-emerald-300 tabular-nums">
                   {formatINR(parsed.amount)}
                 </span>
               )}
             </div>
 
             {parsed.success ? (
-              <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-emerald-800/30">
+              <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-emerald-200 dark:border-emerald-800/30">
                 <div>
-                  <span className="text-slate-400">Merchant: </span>
-                  <span className="font-semibold text-white">{parsed.merchant}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Merchant: </span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{parsed.merchant}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Type: </span>
-                  <span className="capitalize font-semibold text-white">{parsed.type}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Type: </span>
+                  <span className="capitalize font-semibold text-slate-900 dark:text-white">{parsed.type}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400">Bank / App: </span>
-                  <span className="font-semibold text-white">{parsed.bankOrApp}</span>
+                  <span className="text-slate-500 dark:text-slate-400">Bank / App: </span>
+                  <span className="font-semibold text-slate-900 dark:text-white">{parsed.bankOrApp}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400">UPI Ref: </span>
-                  <span className="font-mono text-white">{parsed.upiRefId || 'Not in text'}</span>
+                  <span className="text-slate-500 dark:text-slate-400">UPI Ref: </span>
+                  <span className="font-mono text-slate-900 dark:text-white tabular-nums">{parsed.upiRefId || 'Not in text'}</span>
                 </div>
               </div>
             ) : (
@@ -207,7 +204,7 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
         )}
 
         {error && (
-          <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800 text-xs text-rose-300 flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -218,7 +215,7 @@ export function QuickSmsPasteModal({ onClose, onIngested }: QuickSmsPasteModalPr
           type="button"
           disabled={!parsed?.success}
           onClick={handleIngest}
-          className="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:brightness-110 active:scale-98 disabled:opacity-50 disabled:pointer-events-none text-slate-950 font-bold text-sm shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2"
+          className="w-full py-3 min-h-[44px] rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-500 hover:brightness-110 active:scale-98 disabled:opacity-50 disabled:pointer-events-none text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2"
         >
           <Sparkles className="w-4 h-4" />
           Capture & Open Categorize Prompt

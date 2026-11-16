@@ -95,22 +95,22 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 text-slate-100 flex flex-col max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 flex flex-col max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <KeyRound className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-100">App Security & PIN</h2>
-              <p className="text-xs text-slate-400">Protect financial privacy & auto-lock</p>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">App Security & PIN</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Protect financial privacy & auto-lock</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -122,21 +122,21 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
           <div
             className={`p-4 rounded-2xl border flex items-center justify-between ${
               isPinEnabled
-                ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-300'
-                : 'bg-amber-950/20 border-amber-800/40 text-amber-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-800/40 dark:text-emerald-300'
+                : 'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-950/20 dark:border-amber-800/40 dark:text-amber-300'
             }`}
           >
             <div className="flex items-center gap-3">
               {isPinEnabled ? (
-                <ShieldCheck className="w-6 h-6 text-emerald-400" />
+                <ShieldCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               ) : (
-                <ShieldAlert className="w-6 h-6 text-amber-400" />
+                <ShieldAlert className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               )}
               <div>
                 <p className="text-sm font-semibold">
                   {isPinEnabled ? 'PIN Protection Active' : 'No PIN Set'}
                 </p>
-                <p className="text-xs opacity-80">
+                <p className="text-xs opacity-90">
                   {isPinEnabled
                     ? `Locks after ${autoLockMinutes} minutes of inactivity`
                     : 'Your transactions are currently unprotected'}
@@ -147,7 +147,7 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
               <button
                 type="button"
                 onClick={handleDisablePin}
-                className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30 text-xs font-medium flex items-center gap-1.5 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Disable
@@ -156,14 +156,14 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
           </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800 text-xs text-rose-300 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 flex-shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {success && (
-            <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800 text-xs text-emerald-300 flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 flex-shrink-0" />
               <span>{success}</span>
             </div>
@@ -174,7 +174,7 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
             <form onSubmit={handleCreateOrChangePin} className="space-y-4">
               {isPinEnabled && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     Current 4-Digit PIN
                   </label>
                   <input
@@ -184,14 +184,14 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
                     value={currentPin}
                     onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, ''))}
                     placeholder="••••"
-                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-100 text-center tracking-[0.5em] text-lg font-mono focus:outline-none focus:border-emerald-500"
+                    className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-center tracking-[0.5em] text-lg font-mono focus:outline-none focus:border-emerald-500"
                     required
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   New 4-Digit PIN
                 </label>
                 <input
@@ -201,13 +201,13 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
                   value={newPin}
                   onChange={(e) => setNewPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="••••"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-100 text-center tracking-[0.5em] text-lg font-mono focus:outline-none focus:border-emerald-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-center tracking-[0.5em] text-lg font-mono focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   Confirm New PIN
                 </label>
                 <input
@@ -217,7 +217,7 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
                   placeholder="••••"
-                  className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-slate-100 text-center tracking-[0.5em] text-lg font-mono focus:outline-none focus:border-emerald-500"
+                  className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 text-center tracking-[0.5em] text-lg font-mono focus:outline-none focus:border-emerald-500"
                   required
                 />
               </div>
@@ -226,13 +226,13 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
                 <button
                   type="button"
                   onClick={() => setMode('view')}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-colors"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-colors"
                 >
                   Save PIN
                 </button>
@@ -243,16 +243,16 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
               <button
                 type="button"
                 onClick={() => setMode(isPinEnabled ? 'change' : 'create')}
-                className="w-full py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-slate-200 text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-3 rounded-2xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-800 dark:text-slate-200 text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
               >
-                <Lock className="w-4 h-4 text-emerald-400" />
+                <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 {isPinEnabled ? 'Change 4-Digit PIN' : 'Set Up 4-Digit PIN Now'}
               </button>
 
               {/* Auto-Lock Duration Selection */}
               <div className="pt-2">
-                <label className="text-xs font-medium text-slate-300 flex items-center gap-1.5 mb-2">
-                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-2">
+                  <Clock className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                   Auto-Lock Timer (Inactivity)
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -263,8 +263,8 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
                       onClick={() => handleUpdateAutoLock(mins)}
                       className={`py-2 rounded-xl text-xs font-medium border transition-all ${
                         autoLockMinutes === mins
-                          ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300 font-semibold shadow-sm'
-                          : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
+                          ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold dark:bg-emerald-500/20 dark:border-emerald-500 dark:text-emerald-300 shadow-xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-slate-800/60 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                       }`}
                     >
                       {mins} min

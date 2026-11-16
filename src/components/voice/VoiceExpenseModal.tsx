@@ -3,16 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Mic,
-  MicOff,
   Sparkles,
   CheckCircle2,
   X,
   Volume2,
   AlertCircle,
-  Users,
-  RotateCcw,
 } from 'lucide-react';
-import { Transaction, Category } from '@/lib/types';
+import { Transaction } from '@/lib/types';
 import { formatINR, cleanMerchantName } from '@/lib/formatters';
 import { db, predictCategory } from '@/lib/db';
 
@@ -41,7 +38,6 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Check SpeechRecognition support
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -115,7 +111,6 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
 
     // 2. Extract Amount
     let amount = 0;
-    // Matches: "120 rupees", "rs 120", "rupees 120", "45", "1.5k"
     const amtMatch = clean.match(
       /(?:spent|paid|amount of|rs\.?|rupees|₹)?\s*([0-9,]+(?:\.[0-9]+)?)\s*(?:rupees|rs\.?|₹|bucks)?/i
     );
@@ -147,7 +142,6 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
     if (merchantMatch && merchantMatch[1]) {
       merchant = cleanMerchantName(merchantMatch[1].trim());
     } else {
-      // Fallback
       const words = clean.replace(/^(spent|paid|received|got|\d+|rupees|rs|for|on|at)\s+/g, '');
       if (words.length > 2) merchant = cleanMerchantName(words);
     }
@@ -189,7 +183,6 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
   const handleCommit = async (data: ParsedVoiceData) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
-    // Haptic confirmation
     if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
       try {
         navigator.vibrate(60);
@@ -220,7 +213,6 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
 
     await db.transactions.add(newTxn);
 
-    // If split, add IOU
     if (data.isSplit && data.splitFriendName) {
       await db.ious.add({
         id: `iou-${Date.now()}`,
@@ -252,24 +244,24 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 text-slate-100 space-y-5 text-center"
+        className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 space-y-5 text-center"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+            <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Voice-to-Expense NLP
             </span>
           </div>
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white"
+            className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -283,14 +275,14 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
               onClick={restartListening}
               className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
                 isListening
-                  ? 'bg-rose-500/20 border-2 border-rose-500 text-rose-400 shadow-xl shadow-rose-950/60 scale-105'
-                  : 'bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400'
+                  ? 'bg-rose-50 border-2 border-rose-500 text-rose-600 dark:bg-rose-500/20 dark:border-rose-500 dark:text-rose-400 shadow-xl scale-105'
+                  : 'bg-emerald-50 border-2 border-emerald-500 text-emerald-600 dark:bg-emerald-500/20 dark:border-emerald-500 dark:text-emerald-400'
               }`}
             >
               {isListening ? (
-                <Mic className="w-8 h-8 animate-pulse text-rose-400" />
+                <Mic className="w-8 h-8 animate-pulse text-rose-600 dark:text-rose-400" />
               ) : (
-                <Volume2 className="w-8 h-8 text-emerald-400" />
+                <Volume2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
               )}
             </button>
             {isListening && (
@@ -298,21 +290,21 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
             )}
           </div>
 
-          <p className="text-xs text-slate-400 mt-3 font-medium">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-3 font-medium">
             {isListening ? 'Listening in Indian English (en-IN)...' : 'Tap mic to speak again'}
           </p>
         </div>
 
         {/* Live Transcript Bubble */}
         {transcript && (
-          <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-slate-200 italic">
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-medium text-slate-800 dark:text-slate-200 italic">
             &ldquo;{transcript}&rdquo;
           </div>
         )}
 
         {/* Error Notice */}
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/50 text-xs text-rose-300 flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/50 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -320,25 +312,25 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
 
         {/* Parsed Confirmation Card */}
         {parsedData && (
-          <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-800/50 text-left space-y-2 animate-slide-up">
+          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 text-left space-y-2 animate-slide-up">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400">Merchant / Item:</span>
-              <span className="text-sm font-bold text-white">{parsedData.merchant}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Merchant / Item:</span>
+              <span className="text-sm font-bold text-slate-900 dark:text-white">{parsedData.merchant}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400">Parsed Amount:</span>
-              <span className="text-base font-black font-mono text-emerald-300">
+              <span className="text-xs text-slate-500 dark:text-slate-400">Parsed Amount:</span>
+              <span className="text-base font-black font-mono text-emerald-700 dark:text-emerald-300 tabular-nums">
                 {formatINR(parsedData.amount)}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-400">Category:</span>
-              <span className="text-xs text-cyan-300 font-semibold">{parsedData.category}</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Category:</span>
+              <span className="text-xs text-cyan-700 dark:text-cyan-300 font-semibold">{parsedData.category}</span>
             </div>
             {parsedData.isSplit && (
-              <div className="flex justify-between items-center pt-1 border-t border-emerald-800/40 text-[11px] text-cyan-300">
+              <div className="flex justify-between items-center pt-1 border-t border-emerald-200 dark:border-emerald-800/40 text-[11px] text-cyan-700 dark:text-cyan-300">
                 <span>Split with {parsedData.splitFriendName}:</span>
-                <span className="font-mono">Your share: {formatINR(parsedData.amount / 2)}</span>
+                <span className="font-mono tabular-nums">Your share: {formatINR(parsedData.amount / 2)}</span>
               </div>
             )}
 
@@ -351,14 +343,14 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
                   setCountdown(null);
                   setParsedData(null);
                 }}
-                className="text-[11px] text-slate-400 hover:text-white"
+                className="text-[11px] text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={() => handleCommit(parsedData)}
-                className="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1"
+                className="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 shadow-xs"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {countdown ? `Auto-saving in ${countdown}s...` : 'Save Now'}
@@ -369,8 +361,8 @@ export function VoiceExpenseModal({ onClose, onAdded }: VoiceExpenseModalProps) 
 
         {/* Spoken Samples Guide */}
         {!parsedData && (
-          <div className="text-[11px] text-slate-500 space-y-1">
-            <p className="font-semibold text-slate-400">Try saying:</p>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500 space-y-1">
+            <p className="font-semibold text-slate-600 dark:text-slate-400">Try saying:</p>
             <p>&bull; &ldquo;Spent 120 rupees on cold coffee&rdquo;</p>
             <p>&bull; &ldquo;Paid 45 for PMPML bus ticket&rdquo;</p>
             <p>&bull; &ldquo;Split 600 dinner with Rahul&rdquo;</p>

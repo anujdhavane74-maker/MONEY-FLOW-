@@ -168,27 +168,29 @@ export const DEFAULT_MERCHANT_RULES: Omit<MerchantRule, 'id' | 'createdAt'>[] = 
 export async function initializeDatabase() {
   if (typeof window === 'undefined') return;
 
-  // 1. Seed Categories if empty
+  const hasBeenSeeded = localStorage.getItem('mf_demo_seeded');
+
+  // 1. Seed Categories if empty (Essential reference data, always needed)
   const categoriesCount = await db.categories.count();
   if (categoriesCount === 0) {
     await db.categories.bulkAdd(DEFAULT_CATEGORIES);
   }
 
-  // 2. Seed Quick Presets if empty
+  // 2. Seed Quick Presets if empty (Always needed for speed dial)
   const presetsCount = await db.quick_presets.count();
   if (presetsCount === 0) {
     await db.quick_presets.bulkAdd(DEFAULT_PRESETS);
   }
 
-  // 3. Seed Recurring Bills if empty
+  // 3. Seed Recurring Bills if empty and not explicitly cleared by user
   const billsCount = await db.recurring_bills.count();
-  if (billsCount === 0) {
+  if (billsCount === 0 && hasBeenSeeded !== 'cleared') {
     await db.recurring_bills.bulkAdd(DEFAULT_RECURRING_BILLS);
   }
 
-  // 4. Seed Merchant Rules if empty
+  // 4. Seed Merchant Rules if empty and not explicitly cleared
   const rulesCount = await db.merchant_rules.count();
-  if (rulesCount === 0) {
+  if (rulesCount === 0 && hasBeenSeeded !== 'cleared') {
     const rulesToInsert = DEFAULT_MERCHANT_RULES.map((rule, idx) => ({
       ...rule,
       id: `rule-${idx + 1}`,
@@ -233,9 +235,9 @@ export async function initializeDatabase() {
     }
   }
 
-  // 6. Seed sample IOUs if empty
+  // 6. Seed sample IOUs if empty and not explicitly cleared
   const iousCount = await db.ious.count();
-  if (iousCount === 0) {
+  if (iousCount === 0 && hasBeenSeeded !== 'cleared') {
     const now = Date.now();
     const day = 86400000;
     const sampleIOUs: IOU[] = [
@@ -259,9 +261,9 @@ export async function initializeDatabase() {
     await db.ious.bulkAdd(sampleIOUs);
   }
 
-  // 7. Seed initial realistic transactions & savings goals if database is fresh
+  // 7. Seed initial realistic transactions & savings goals if fresh and not cleared
   const txnCount = await db.transactions.count();
-  if (txnCount === 0) {
+  if (txnCount === 0 && hasBeenSeeded !== 'cleared') {
     const now = Date.now();
     const day = 86400000;
 
@@ -445,7 +447,24 @@ export async function initializeDatabase() {
     ];
 
     await db.savings_goals.bulkAdd(sampleGoals);
+    localStorage.setItem('mf_demo_seeded', 'true');
   }
+}
+
+/**
+ * Wipes all mock transactions, mock bills, mock IOUs, and learned rules from local IndexedDB
+ * while strictly preserving the user's PIN hash, API key/webhook secret, and app settings.
+ */
+export async function clearAllDemoData(): Promise<void> {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('mf_demo_seeded', 'cleared');
+  }
+  await db.transaction('rw', [db.transactions, db.recurring_bills, db.ious, db.merchant_rules], async () => {
+    await db.transactions.clear();
+    await db.recurring_bills.clear();
+    await db.ious.clear();
+    await db.merchant_rules.clear();
+  });
 }
 
 /**

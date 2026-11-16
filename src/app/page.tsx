@@ -258,9 +258,9 @@ function DashboardContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-slate-700 dark:text-slate-300 transition-colors">
         <div className="w-12 h-12 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mb-4" />
-        <p className="text-sm font-semibold tracking-wide text-slate-400">Loading Money Flow Vault...</p>
+        <p className="text-sm font-semibold tracking-wide text-slate-500 dark:text-slate-400">Loading Money Flow Vault...</p>
       </div>
     );
   }
@@ -279,7 +279,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
       {/* Top Header */}
       <Header
         onLockApp={() => setIsLocked(true)}
@@ -288,20 +288,22 @@ function DashboardContent() {
         onOpenParentShare={() => setActiveTab('settings')}
         onOpenVoiceModal={() => setShowVoiceModal(true)}
         uncategorizedCount={uncategorizedCount}
+        activeTab={activeTab}
+        onChangeTab={(t) => setActiveTab(t)}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-12 space-y-6">
         {/* Uncategorized Prompt Notification Banner */}
         {uncategorizedCount > 0 && (
-          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between text-xs animate-fade-in">
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between text-xs animate-fade-in shadow-xs">
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-amber-400 animate-spin-slow" />
+              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-spin-slow" />
               <div>
-                <p className="font-bold text-amber-300">
+                <p className="font-bold text-amber-800 dark:text-amber-300">
                   {uncategorizedCount} Pending Transaction{uncategorizedCount > 1 ? 's' : ''} Need Categorization
                 </p>
-                <p className="text-slate-400">
+                <p className="text-slate-600 dark:text-slate-400">
                   Tap to 1-click categorize where your money was spent.
                 </p>
               </div>
@@ -312,55 +314,62 @@ function DashboardContent() {
                 const target = transactions.find((t) => !t.isCategorized);
                 if (target) setActivePromptTxn(target);
               }}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all"
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all shadow-xs"
             >
               Categorize
             </button>
           </div>
         )}
 
-        {/* Tab 1: Dashboard */}
+        {/* Tab 1: Dashboard (12-Column Responsive Bento Grid on >=1024px) */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            {/* 1. Daily Safe-to-Spend Dial (Auto-Fed by Recurring Bills) */}
-            <DailySafeToSpend
-              monthlyBudget={settings?.monthlyBudget || 25000}
-              fixedRecurringBills={fixedRecurringToUse}
-              totalSpentThisMonth={totalExpense}
-              spentToday={spentToday}
-              onBudgetUpdated={loadData}
-            />
+            {/* Top Row: Daily Safe-to-Spend (5 cols) + Summary Cards (7 cols, 2x2 grid inside) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-stretch">
+              <div className="lg:col-span-5 h-full">
+                <DailySafeToSpend
+                  monthlyBudget={settings?.monthlyBudget || 25000}
+                  fixedRecurringBills={fixedRecurringToUse}
+                  totalSpentThisMonth={totalExpense}
+                  spentToday={spentToday}
+                  onBudgetUpdated={loadData}
+                />
+              </div>
+              <div className="lg:col-span-7 h-full flex flex-col justify-between">
+                <SummaryCards
+                  currentBalance={currentBalance}
+                  totalIncome={totalIncome}
+                  totalExpense={totalExpense}
+                  totalSavings={totalSavings}
+                />
+              </div>
+            </div>
 
-            {/* 2. 1-Tap Frequent Spends Speed Dial */}
-            <QuickSpendsBar presets={presets} onLogged={loadData} />
+            {/* Second Row: 1-Tap Frequent Spends Speed Dial (Full 12 Columns) */}
+            <div className="w-full">
+              <QuickSpendsBar presets={presets} onLogged={loadData} />
+            </div>
 
-            {/* 3. Top Financial Summary Cards */}
-            <SummaryCards
-              currentBalance={currentBalance}
-              totalIncome={totalIncome}
-              totalExpense={totalExpense}
-              totalSavings={totalSavings}
-            />
+            {/* Main Body Bento: Left 7 Columns (Charts & Activity) + Right 5 Columns (Budgets, IOUs, Bills) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+              {/* Left Column (7 cols): Financial Charts + Recent Transactions Feed */}
+              <div className="lg:col-span-7 space-y-6">
+                <FinancialCharts transactions={transactions} />
+                <RecentTransactions
+                  transactions={transactions.slice(0, 8)}
+                  categories={categories}
+                  onOpenCategorizeModal={(txn) => setActivePromptTxn(txn)}
+                  onRefresh={loadData}
+                />
+              </div>
 
-            {/* 4. Category Budget Gauges & Pace Tracker */}
-            <CategoryBudgetGauges categories={categories} transactions={transactions} />
-
-            {/* 5. Recurring Bills & Subscriptions Manager */}
-            <RecurringBillsCard bills={bills} onRefresh={loadData} />
-
-            {/* 6. Split & IOU Ledger (Mini-Splitwise) */}
-            <IOULedgerCard ious={ious} onRefresh={loadData} />
-
-            {/* 7. Visualizations */}
-            <FinancialCharts transactions={transactions} />
-
-            {/* 8. Recent Transactions Feed */}
-            <RecentTransactions
-              transactions={transactions.slice(0, 8)}
-              categories={categories}
-              onOpenCategorizeModal={(txn) => setActivePromptTxn(txn)}
-              onRefresh={loadData}
-            />
+              {/* Right Column (5 cols): Category Budget Gauges + Split & IOUs + Recurring Bills */}
+              <div className="lg:col-span-5 space-y-6">
+                <CategoryBudgetGauges categories={categories} transactions={transactions} />
+                <IOULedgerCard ious={ious} onRefresh={loadData} />
+                <RecurringBillsCard bills={bills} onRefresh={loadData} />
+              </div>
+            </div>
           </div>
         )}
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import {
   ResponsiveContainer,
   PieChart,
@@ -17,6 +17,7 @@ import {
 import { PieChart as PieIcon, BarChart3 } from 'lucide-react';
 import { Transaction } from '@/lib/types';
 import { formatINR } from '@/lib/formatters';
+import { useTheme } from '@/lib/theme';
 
 interface FinancialChartsProps {
   transactions: Transaction[];
@@ -45,9 +46,10 @@ const FALLBACK_COLORS = [
   '#ef4444',
 ];
 
-export function FinancialCharts({ transactions }: FinancialChartsProps) {
+export const FinancialCharts = memo(function FinancialCharts({ transactions }: FinancialChartsProps) {
   const [mounted, setMounted] = useState(false);
   const [chartView, setChartView] = useState<'donut' | 'cashflow'>('donut');
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -55,7 +57,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
 
   if (!mounted) {
     return (
-      <div className="h-64 rounded-3xl bg-slate-900/60 border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
+      <div className="h-64 rounded-3xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs">
         Loading visualizations...
       </div>
     );
@@ -109,16 +111,21 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
 
   const cashFlowData = Object.values(dayBuckets);
 
+  const isDark = resolvedTheme === 'dark';
+  const gridStroke = isDark ? '#1e293b' : '#e2e8f0';
+  const axisColor = isDark ? '#94a3b8' : '#64748b';
+  const cellStroke = isDark ? '#090d16' : '#ffffff';
+
   // Custom Donut Tooltip
   const CustomDonutTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const pct = totalExpenseVal > 0 ? ((data.value / totalExpenseVal) * 100).toFixed(1) : 0;
       return (
-        <div className="bg-slate-900 border border-slate-700/80 p-2.5 rounded-xl shadow-xl text-xs">
-          <p className="font-semibold text-slate-200">{data.name}</p>
-          <p className="text-emerald-400 font-bold font-mono mt-0.5">{formatINR(data.value)}</p>
-          <p className="text-slate-400 text-[10px] mt-0.5">{pct}% of monthly spend</p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 p-2.5 rounded-xl shadow-xl text-xs">
+          <p className="font-semibold text-slate-900 dark:text-slate-200">{data.name}</p>
+          <p className="text-emerald-600 dark:text-emerald-400 font-bold font-mono tabular-nums mt-0.5">{formatINR(data.value)}</p>
+          <p className="text-slate-500 dark:text-slate-400 text-[10px] mt-0.5 tabular-nums">{pct}% of monthly spend</p>
         </div>
       );
     }
@@ -129,12 +136,12 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
   const CustomBarTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-slate-900 border border-slate-700/80 p-2.5 rounded-xl shadow-xl text-xs space-y-1">
-          <p className="font-semibold text-slate-300">{label}</p>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+          <p className="font-semibold text-slate-800 dark:text-slate-300">{label}</p>
           {payload.map((entry: any, index: number) => (
             <p
               key={`item-${index}`}
-              className="font-mono text-xs font-medium"
+              className="font-mono tabular-nums text-xs font-medium"
               style={{ color: entry.color }}
             >
               {entry.name}: {formatINR(entry.value)}
@@ -147,14 +154,14 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
   };
 
   return (
-    <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 shadow-lg space-y-4">
+    <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-4 transition-colors">
       {/* Header with Switcher */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300">
             {chartView === 'donut' ? 'Spending by Category' : '7-Day Cash Flow'}
           </h2>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {chartView === 'donut'
               ? 'Where your money flows this month'
               : 'Income vs. Expense daily comparison'}
@@ -162,14 +169,14 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         </div>
 
         {/* View Switcher Pills */}
-        <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-2xl border border-slate-700/60">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/60">
           <button
             type="button"
             onClick={() => setChartView('donut')}
             className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
               chartView === 'donut'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-emerald-500 text-slate-950 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <PieIcon className="w-3.5 h-3.5" />
@@ -180,8 +187,8 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
             onClick={() => setChartView('cashflow')}
             className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
               chartView === 'cashflow'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-emerald-500 text-slate-950 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
@@ -194,7 +201,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
       <div className="h-64 w-full">
         {chartView === 'donut' ? (
           donutData.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs">
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-xs">
               <PieIcon className="w-8 h-8 mb-2 opacity-30" />
               <span>No expense transactions logged this month</span>
             </div>
@@ -216,7 +223,7 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                         const color =
                           CATEGORY_COLORS[entry.name] ||
                           FALLBACK_COLORS[index % FALLBACK_COLORS.length];
-                        return <Cell key={`cell-${index}`} fill={color} stroke="#0f172a" strokeWidth={2} />;
+                        return <Cell key={`cell-${index}`} fill={color} stroke={cellStroke} strokeWidth={2} />;
                       })}
                     </Pie>
                     <Tooltip content={<CustomDonutTooltip />} />
@@ -234,18 +241,18 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
                   return (
                     <div
                       key={entry.name}
-                      className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-slate-800/40 hover:bg-slate-800/70 transition-colors"
+                      className="flex items-center justify-between text-xs py-1.5 px-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/70 border border-slate-200/60 dark:border-transparent transition-colors"
                     >
                       <div className="flex items-center gap-2 truncate">
                         <span
                           className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                           style={{ backgroundColor: color }}
                         />
-                        <span className="text-slate-300 truncate">{entry.name}</span>
+                        <span className="text-slate-800 dark:text-slate-300 truncate">{entry.name}</span>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="font-mono text-slate-200 font-semibold">{formatINR(entry.value)}</span>
-                        <span className="text-[10px] text-slate-500 w-7 text-right">{pct}%</span>
+                        <span className="font-mono tabular-nums text-slate-900 dark:text-slate-200 font-semibold">{formatINR(entry.value)}</span>
+                        <span className="text-[10px] tabular-nums text-slate-500 w-7 text-right">{pct}%</span>
                       </div>
                     </div>
                   );
@@ -256,14 +263,14 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={cashFlowData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-              <XAxis dataKey="dayLabel" stroke="#64748b" fontSize={11} tickLine={false} />
-              <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(val) => `₹${val}`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
+              <XAxis dataKey="dayLabel" stroke={axisColor} fontSize={11} tickLine={false} />
+              <YAxis stroke={axisColor} fontSize={11} tickLine={false} tickFormatter={(val) => `₹${val}`} />
               <Tooltip content={<CustomBarTooltip />} />
               <Legend
                 wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
                 formatter={(val) => (
-                  <span className="text-slate-300 capitalize">{val}</span>
+                  <span className="text-slate-700 dark:text-slate-300 capitalize">{val}</span>
                 )}
               />
               <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -274,4 +281,4 @@ export function FinancialCharts({ transactions }: FinancialChartsProps) {
       </div>
     </div>
   );
-}
+});

@@ -299,29 +299,29 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 text-slate-100 flex flex-col max-h-[92vh] overflow-y-auto space-y-4"
+        className="w-full max-w-2xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 flex flex-col max-h-[92vh] overflow-y-auto space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Google Pay Statement Importer</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">Google Pay Statement Importer</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Fuzzy & exact deduplication merge engine (CSV & PDF)
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -331,12 +331,12 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
         {!importSummary && (
           <div className="space-y-4">
             {/* Dropzone */}
-            <label className="border-2 border-dashed border-slate-700 hover:border-blue-500/80 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-800/20 hover:bg-slate-800/40">
-              <UploadCloud className="w-12 h-12 text-blue-400 mb-3 animate-pulse" />
-              <p className="text-sm font-semibold text-slate-200">
+            <label className="border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-500/80 rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/20 dark:hover:bg-slate-800/40">
+              <UploadCloud className="w-12 h-12 text-blue-500 dark:text-blue-400 mb-3 animate-pulse" />
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 Drop your Google Pay CSV or PDF statement here
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Supports exports from Google Pay, PhonePe, Paytm, and Indian Bank UPI statements
               </p>
               <input
@@ -348,13 +348,13 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
             </label>
 
             {/* Quick Demo Test Option */}
-            <div className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/60 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
               <div>
-                <p className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <p className="text-xs font-bold text-slate-900 dark:text-slate-200 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
                   Try Sample Google Pay Statement
                 </p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   Simulate importing 7 transactions to test deduplication & merging live
                 </p>
               </div>
@@ -362,14 +362,14 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
                 type="button"
                 onClick={handleLoadSampleStatement}
                 disabled={parsing}
-                className="px-3 py-1.5 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-500/30 text-xs font-semibold text-blue-300 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/15 dark:hover:bg-blue-500/25 border border-blue-200 dark:border-blue-500/30 text-xs font-semibold text-blue-700 dark:text-blue-300 transition-colors"
               >
                 {parsing ? 'Parsing...' : 'Load Sample'}
               </button>
             </div>
 
             {errorMsg && (
-              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800 text-xs text-rose-300 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{errorMsg}</span>
               </div>
@@ -382,35 +382,35 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
           <div className="space-y-4 animate-fade-in">
             {/* Top Stat Pills */}
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700">
-                <span className="text-[10px] text-slate-400 uppercase font-semibold">Total Rows</span>
-                <p className="text-xl font-bold font-mono text-slate-100">
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Total Rows</span>
+                <p className="text-xl font-bold font-mono text-slate-900 dark:text-slate-100 tabular-nums">
                   {importSummary.totalParsed}
                 </p>
               </div>
-              <div className="p-3 rounded-2xl bg-cyan-950/30 border border-cyan-800/50">
-                <span className="text-[10px] text-cyan-400 uppercase font-semibold">
+              <div className="p-3 rounded-2xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800/50">
+                <span className="text-[10px] text-cyan-700 dark:text-cyan-400 uppercase font-semibold">
                   Already Synced
                 </span>
-                <p className="text-xl font-bold font-mono text-cyan-300">
+                <p className="text-xl font-bold font-mono text-cyan-800 dark:text-cyan-300 tabular-nums">
                   {importSummary.mergedCount}
                 </p>
-                <span className="text-[9px] text-cyan-500">Merged / Enriched</span>
+                <span className="text-[9px] text-cyan-600 dark:text-cyan-500">Merged / Enriched</span>
               </div>
-              <div className="p-3 rounded-2xl bg-emerald-950/30 border border-emerald-800/50">
-                <span className="text-[10px] text-emerald-400 uppercase font-semibold">
+              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50">
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 uppercase font-semibold">
                   New Transactions
                 </span>
-                <p className="text-xl font-bold font-mono text-emerald-300">
+                <p className="text-xl font-bold font-mono text-emerald-800 dark:text-emerald-300 tabular-nums">
                   {importSummary.newCount}
                 </p>
-                <span className="text-[9px] text-emerald-500">Will be added</span>
+                <span className="text-[9px] text-emerald-600 dark:text-emerald-500">Will be added</span>
               </div>
             </div>
 
             {/* Invariant Explanation Banner */}
-            <div className="p-3 rounded-xl bg-blue-950/30 border border-blue-800/40 text-[11px] text-blue-200 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
+            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-[11px] text-blue-900 dark:text-blue-200 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <span>
                 <strong>Intelligent Deduplication Active:</strong> Merged transactions enrich missing
                 UPI Reference IDs without overwriting your custom categories or notes.
@@ -418,8 +418,8 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
             </div>
 
             {/* Transaction Matching Table */}
-            <div className="rounded-2xl border border-slate-800 overflow-hidden">
-              <div className="max-h-60 overflow-y-auto divide-y divide-slate-800">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
                 {importSummary.transactions.map((item, idx) => {
                   const isMerged = item.status === 'merged';
                   const txn = item.transaction;
@@ -427,14 +427,14 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
                   return (
                     <div
                       key={idx}
-                      className="p-3 flex items-center justify-between text-xs hover:bg-slate-800/30 transition-colors"
+                      className="p-3 flex items-center justify-between text-xs hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
                     >
                       <div className="flex items-center gap-2.5">
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             isMerged
-                              ? 'bg-cyan-950/60 border border-cyan-800/60 text-cyan-300'
-                              : 'bg-emerald-950/60 border border-emerald-800/60 text-emerald-300'
+                              ? 'bg-cyan-100 border border-cyan-300 text-cyan-800 dark:bg-cyan-950/60 dark:border-cyan-800/60 dark:text-cyan-300'
+                              : 'bg-emerald-100 border border-emerald-300 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-800/60 dark:text-emerald-300'
                           }`}
                         >
                           {isMerged
@@ -444,13 +444,13 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
                             : 'New Record'}
                         </span>
                         <div>
-                          <p className="font-semibold text-slate-200">{txn.merchant}</p>
-                          <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                          <p className="font-semibold text-slate-800 dark:text-slate-200">{txn.merchant}</p>
+                          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
                             <span>{txn.category}</span>
                             {txn.upiRefId && (
                               <>
                                 <span>•</span>
-                                <span className="font-mono text-slate-500">UTR: {txn.upiRefId}</span>
+                                <span className="font-mono text-slate-400 dark:text-slate-500 tabular-nums">UTR: {txn.upiRefId}</span>
                               </>
                             )}
                           </div>
@@ -459,13 +459,13 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
 
                       <div className="text-right">
                         <p
-                          className={`font-bold font-mono ${
-                            txn.type === 'expense' ? 'text-slate-100' : 'text-emerald-400'
+                          className={`font-bold font-mono tabular-nums ${
+                            txn.type === 'expense' ? 'text-slate-800 dark:text-slate-100' : 'text-emerald-600 dark:text-emerald-400'
                           }`}
                         >
                           {txn.type === 'expense' ? '-' : '+'}{formatINR(txn.amount)}
                         </p>
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 tabular-nums">
                           {formatISTDate(txn.timestamp)}
                         </span>
                       </div>
@@ -480,7 +480,7 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
               <button
                 type="button"
                 onClick={() => setImportSummary(null)}
-                className="py-3 px-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-colors"
+                className="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-colors"
               >
                 Reset / Back
               </button>
@@ -488,7 +488,7 @@ export function GPayImporterModal({ onClose, onImportComplete }: GPayImporterMod
                 type="button"
                 onClick={handleCommit}
                 disabled={isCommitting}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-400 hover:brightness-110 active:scale-98 text-slate-950 font-bold text-xs shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2"
+                className="flex-1 py-3 min-h-[44px] rounded-2xl bg-gradient-to-r from-blue-600 to-emerald-500 hover:brightness-110 active:scale-98 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <Database className="w-4 h-4" />
                 Commit Reconciliation ({importSummary.mergedCount} Merged, {importSummary.newCount} Added)

@@ -8,10 +8,6 @@ import {
   TrendingUp,
   PiggyBank,
   Sparkles,
-  Calendar,
-  CreditCard,
-  Tag,
-  FileText,
   Users,
   Trash2,
 } from 'lucide-react';
@@ -34,7 +30,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
   const [upiRefId, setUpiRefId] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [dateStr, setDateStr] = useState<string>(
-    new Date().toISOString().slice(0, 16) // format YYYY-MM-DDTHH:mm
+    new Date().toISOString().slice(0, 16)
   );
   const [isAutoPredicted, setIsAutoPredicted] = useState<boolean>(false);
 
@@ -45,7 +41,6 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
     { name: '', amount: 0 },
   ]);
 
-  // Auto-predict category as merchant changes
   useEffect(() => {
     async function checkPrediction() {
       if (merchant.length >= 3) {
@@ -59,7 +54,6 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
     checkPrediction();
   }, [merchant]);
 
-  // Set default category when type changes
   useEffect(() => {
     const available = categories.filter((c) => c.type === type);
     if (available.length > 0 && (!category || !available.some((c) => c.name === category))) {
@@ -67,7 +61,6 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
     }
   }, [type, categories, category]);
 
-  // Split Calculations
   const parsedTotalAmount = parseFloat(amount) || 0;
   const numFriends = Math.max(1, friendsList.length);
 
@@ -123,8 +116,6 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
     const timestamp = new Date(dateStr).getTime() || Date.now();
     const newTxnId = `txn-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
-    // Critical Accounting Rule:
-    // Only record 'myPersonalShare' as the transaction amount so personal spending stays accurate!
     await db.transactions.add({
       id: newTxnId,
       amount: isSplit && type === 'expense' ? myPersonalShare : parsedTotalAmount,
@@ -144,7 +135,6 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
       updatedAt: Date.now(),
     });
 
-    // If split, add IOUs for each friend
     if (isSplit && type === 'expense') {
       for (const friend of computedFriends) {
         if (friend.name.trim() && friend.amount > 0) {
@@ -161,7 +151,6 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
       }
     }
 
-    // Auto-learn rule for future
     if (merchant && category) {
       await learnMerchantRule(merchant, category);
     }
@@ -179,41 +168,41 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl p-6 text-slate-100 flex flex-col max-h-[92vh] overflow-y-auto"
+        className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 flex flex-col max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
               <Plus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-100">Add Transaction</h2>
-              <p className="text-xs text-slate-400">Log income, expense, or savings</p>
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Add Transaction</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Log income, expense, or savings</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Type Switcher */}
-        <div className="grid grid-cols-3 gap-2 my-4 p-1 rounded-2xl bg-slate-800/80 border border-slate-700/60">
+        <div className="grid grid-cols-3 gap-2 my-4 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
           <button
             type="button"
             onClick={() => setType('expense')}
             className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
               type === 'expense'
-                ? 'bg-rose-500 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-rose-500 text-white dark:text-slate-950 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <TrendingDown className="w-3.5 h-3.5" />
@@ -227,8 +216,8 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
             }}
             className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
               type === 'income'
-                ? 'bg-emerald-500 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-emerald-500 text-white dark:text-slate-950 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <TrendingUp className="w-3.5 h-3.5" />
@@ -242,8 +231,8 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
             }}
             className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
               type === 'savings'
-                ? 'bg-cyan-500 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-cyan-500 text-white dark:text-slate-950 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <PiggyBank className="w-3.5 h-3.5" />
@@ -255,11 +244,11 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Amount Input */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               {isSplit ? 'Total Bill Paid at Counter' : 'Amount'} (INR ₹)
             </label>
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-emerald-400 font-mono">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
                 ₹
               </span>
               <input
@@ -270,7 +259,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus
-                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-800/80 border border-slate-700 text-2xl font-black font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-emerald-500"
+                className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-2xl font-black font-mono tabular-nums text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-emerald-500"
                 required
               />
             </div>
@@ -278,32 +267,32 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
 
           {/* Split Expense Toggle (Available for Expenses) */}
           {type === 'expense' && (
-            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700 space-y-3">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-bold text-slate-200">Split This Bill with Friends</span>
+                  <Users className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Split This Bill with Friends</span>
                 </div>
                 <input
                   type="checkbox"
                   checked={isSplit}
                   onChange={(e) => setIsSplit(e.target.checked)}
-                  className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-400 bg-slate-700 border-slate-600 cursor-pointer"
+                  className="w-4 h-4 rounded text-cyan-500 focus:ring-cyan-400 bg-slate-100 border-slate-300 dark:bg-slate-700 dark:border-slate-600 cursor-pointer"
                 />
               </div>
 
               {isSplit && (
-                <div className="space-y-3 pt-2 border-t border-slate-700/60 animate-fade-in">
+                <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700/60 animate-fade-in">
                   {/* Split Type Selector */}
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-slate-400">Method:</span>
+                    <span className="text-slate-500 dark:text-slate-400">Method:</span>
                     <button
                       type="button"
                       onClick={() => setSplitType('equal')}
                       className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
                         splitType === 'equal'
-                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
-                          : 'bg-slate-700 text-slate-300'
+                          ? 'bg-cyan-600 text-white dark:bg-cyan-500 dark:text-slate-950 shadow-xs'
+                          : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                       }`}
                     >
                       Split Equally
@@ -313,8 +302,8 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                       onClick={() => setSplitType('exact')}
                       className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
                         splitType === 'exact'
-                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
-                          : 'bg-slate-700 text-slate-300'
+                          ? 'bg-cyan-600 text-white dark:bg-cyan-500 dark:text-slate-950 shadow-xs'
+                          : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
                       }`}
                     >
                       Exact Amounts
@@ -330,7 +319,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                           placeholder="Friend Name (e.g. Rahul)"
                           value={friend.name}
                           onChange={(e) => handleFriendNameChange(idx, e.target.value)}
-                          className="flex-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500"
+                          className="flex-1 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
                           required={isSplit}
                         />
                         {splitType === 'exact' ? (
@@ -339,10 +328,10 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                             placeholder="₹ Owed"
                             value={friend.amount || ''}
                             onChange={(e) => handleFriendAmountChange(idx, e.target.value)}
-                            className="w-24 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono text-white focus:outline-none focus:border-cyan-500"
+                            className="w-24 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:border-cyan-500"
                           />
                         ) : (
-                          <span className="px-2.5 py-1.5 rounded-xl bg-slate-900 font-mono text-xs text-cyan-300 font-semibold w-24 text-center">
+                          <span className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 font-mono text-xs text-cyan-700 dark:text-cyan-300 font-semibold w-24 text-center tabular-nums border border-slate-200 dark:border-transparent">
                             {formatINR(computedFriends[idx]?.amount || 0)}
                           </span>
                         )}
@@ -350,7 +339,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                           <button
                             type="button"
                             onClick={() => handleRemoveFriend(idx)}
-                            className="p-1.5 text-slate-400 hover:text-rose-400"
+                            className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -361,7 +350,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                     <button
                       type="button"
                       onClick={handleAddFriend}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 pt-1"
+                      className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 font-semibold flex items-center gap-1 pt-1"
                     >
                       <Plus className="w-3 h-3" />
                       Add Another Friend
@@ -369,18 +358,18 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                   </div>
 
                   {/* Accounting Preview Banner */}
-                  <div className="p-3 rounded-xl bg-cyan-950/30 border border-cyan-800/40 text-[11px] text-cyan-200 space-y-1">
+                  <div className="p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800/40 text-[11px] text-cyan-900 dark:text-cyan-200 space-y-1">
                     <div className="flex justify-between font-bold">
                       <span>Your Personal Share:</span>
-                      <span className="font-mono text-emerald-400">{formatINR(myPersonalShare)}</span>
+                      <span className="font-mono text-emerald-700 dark:text-emerald-400 tabular-nums">{formatINR(myPersonalShare)}</span>
                     </div>
-                    <div className="flex justify-between text-slate-400">
+                    <div className="flex justify-between text-slate-600 dark:text-slate-400">
                       <span>Logged to IOU Ledger (Owed to you):</span>
-                      <span className="font-mono text-cyan-300">
+                      <span className="font-mono text-cyan-700 dark:text-cyan-300 tabular-nums">
                         {formatINR(parsedTotalAmount - myPersonalShare)}
                       </span>
                     </div>
-                    <p className="text-[10px] text-slate-500 pt-1">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-500 pt-1">
                       ✅ Only {formatINR(myPersonalShare)} counts toward your daily safe limit and category budget!
                     </p>
                   </div>
@@ -391,7 +380,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
 
           {/* Merchant / Payee */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               {type === 'income' ? 'Received From (Source)' : 'Merchant / Paid To'}
             </label>
             <div className="relative">
@@ -407,11 +396,11 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                   setMerchant(e.target.value);
                   setIsAutoPredicted(false);
                 }}
-                className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                 required
               />
               {isAutoPredicted && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] text-emerald-400 font-medium">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
                   <Sparkles className="w-3 h-3" />
                   Auto-Tagged
                 </div>
@@ -421,7 +410,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
 
           {/* Category Selector */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
               Category
             </label>
             <select
@@ -430,7 +419,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
                 setCategory(e.target.value);
                 setIsAutoPredicted(false);
               }}
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
             >
               {availableCategories.map((c) => (
                 <option key={c.id} value={c.name}>
@@ -443,21 +432,21 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
           {/* Grid: Date & Bank/App */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Date & Time</label>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Date & Time</label>
               <input
                 type="datetime-local"
                 value={dateStr}
                 onChange={(e) => setDateStr(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1">Payment Method</label>
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Payment Method</label>
               <select
                 value={bankOrApp}
                 onChange={(e) => setBankOrApp(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
+                className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500"
               >
                 <option value="GPay">Google Pay (UPI)</option>
                 <option value="PhonePe">PhonePe</option>
@@ -474,7 +463,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
 
           {/* Optional UPI Ref ID */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
               UPI Reference / UTR (Optional)
             </label>
             <input
@@ -483,19 +472,19 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
               placeholder="12-digit UTR No. e.g. 418291029182"
               value={upiRefId}
               onChange={(e) => setUpiRefId(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+              className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 tabular-nums"
             />
           </div>
 
           {/* Optional Notes */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Notes (Optional)</label>
+            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Notes (Optional)</label>
             <input
               type="text"
               placeholder="e.g. Snacks with friends, course books"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+              className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
           </div>
 
@@ -503,7 +492,7 @@ export function AddTransactionModal({ categories, onClose, onAdded }: AddTransac
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 active:scale-98 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all"
+              className="w-full py-3 min-h-[44px] rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 active:scale-98 text-slate-950 font-bold text-sm shadow-md transition-all"
             >
               Save Transaction
             </button>

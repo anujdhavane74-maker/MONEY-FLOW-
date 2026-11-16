@@ -148,7 +148,6 @@ export function PinLockScreen({
       } else if (step === 'confirm') {
         if (pin === firstEnteredPin) {
           const newHash = await hashPin(pin);
-          // Save in database
           await db.app_settings.update('global', {
             pinHash: newHash,
             pinEnabled: true,
@@ -171,7 +170,7 @@ export function PinLockScreen({
     handlePin();
   }, [pin, step, storedHash, firstEnteredPin, lockoutSecondsLeft, onUnlock, onPinCreated, triggerError, handleSuccessfulUnlock]);
 
-  // Physical keyboard support (disabled during lockout)
+  // Physical keyboard support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (lockoutSecondsLeft > 0) return;
@@ -209,31 +208,31 @@ export function PinLockScreen({
   const isLockedOut = lockoutSecondsLeft > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-slate-950/95 backdrop-blur-xl p-6 select-none text-white overflow-hidden">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-slate-50/98 dark:bg-slate-950/95 backdrop-blur-xl p-6 select-none text-slate-900 dark:text-white overflow-hidden transition-colors">
       {/* Top Section */}
       <div className="w-full max-w-xs flex flex-col items-center pt-8 text-center">
         <div className="relative mb-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-950/50">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-950/20">
             {isSuccess ? (
-              <CheckCircle2 className="w-8 h-8 text-emerald-400 animate-bounce" />
+              <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-bounce" />
             ) : isLockedOut ? (
-              <AlertOctagon className="w-8 h-8 text-rose-400 animate-pulse" />
+              <AlertOctagon className="w-8 h-8 text-rose-600 dark:text-rose-400 animate-pulse" />
             ) : step === 'enter' ? (
-              <Lock className="w-8 h-8 text-emerald-400" />
+              <Lock className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             ) : (
-              <KeyRound className="w-8 h-8 text-cyan-400" />
+              <KeyRound className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
             )}
           </div>
           <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-20 blur-md -z-10" />
         </div>
 
-        <h1 className="text-2xl font-bold tracking-tight text-slate-100">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
           {isLockedOut && 'Numpad Locked'}
           {!isLockedOut && step === 'enter' && 'Money Flow Locked'}
           {!isLockedOut && step === 'create' && 'Create 4-Digit PIN'}
           {!isLockedOut && step === 'confirm' && 'Confirm Your PIN'}
         </h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
           {isLockedOut && `Too many failed attempts. Please wait.`}
           {!isLockedOut && step === 'enter' && 'Enter your PIN to access your finance vault'}
           {!isLockedOut && step === 'create' && 'Set a 4-digit code to protect your transactions'}
@@ -242,11 +241,11 @@ export function PinLockScreen({
 
         {/* Lockout Banner */}
         {isLockedOut ? (
-          <div className="my-6 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2 animate-fade-in font-medium">
-            <AlertOctagon className="w-4 h-4 text-rose-400 flex-shrink-0 animate-spin-slow" />
+          <div className="my-6 p-3 rounded-2xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2 animate-fade-in font-medium">
+            <AlertOctagon className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0 animate-spin-slow" />
             <span>
               Brute-force protection: Try again in{' '}
-              <strong className="font-mono text-white text-sm">{lockoutSecondsLeft}s</strong>
+              <strong className="font-mono text-slate-900 dark:text-white text-sm tabular-nums">{lockoutSecondsLeft}s</strong>
             </span>
           </div>
         ) : (
@@ -264,9 +263,9 @@ export function PinLockScreen({
                   className={`w-4 h-4 rounded-full transition-all duration-200 ${
                     isFilled
                       ? isSuccess
-                        ? 'bg-emerald-400 scale-125 shadow-lg shadow-emerald-400/50'
-                        : 'bg-emerald-400 scale-110 shadow-md shadow-emerald-400/40'
-                      : 'bg-slate-800 border-2 border-slate-700'
+                        ? 'bg-emerald-500 scale-125 shadow-lg shadow-emerald-400/50'
+                        : 'bg-emerald-500 scale-110 shadow-md shadow-emerald-400/40'
+                      : 'bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700'
                   }`}
                 />
               );
@@ -276,7 +275,7 @@ export function PinLockScreen({
 
         {/* Error Message */}
         {errorMsg && !isLockedOut ? (
-          <div className="flex items-center gap-1.5 text-xs text-rose-400 bg-rose-950/40 px-3 py-1.5 rounded-full border border-rose-800/40 animate-fade-in">
+          <div className="flex items-center gap-1.5 text-xs text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 rounded-full border border-rose-200 dark:border-rose-800/40 animate-fade-in">
             <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0" />
             <span>{errorMsg}</span>
           </div>
@@ -285,7 +284,7 @@ export function PinLockScreen({
         )}
       </div>
 
-      {/* Numeric Keypad (Disabled during lockout) */}
+      {/* Numeric Keypad */}
       <div className={`w-full max-w-xs grid grid-cols-3 gap-4 pb-8 transition-opacity ${isLockedOut ? 'opacity-30 pointer-events-none' : ''}`}>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
@@ -293,7 +292,7 @@ export function PinLockScreen({
             onClick={() => handleDigit(num.toString())}
             disabled={isLockedOut}
             type="button"
-            className="h-16 rounded-2xl bg-slate-900/80 hover:bg-slate-800 active:bg-emerald-500/20 active:scale-95 border border-slate-800 hover:border-slate-700 text-2xl font-semibold tracking-wider text-slate-100 flex items-center justify-center transition-all duration-150 shadow-sm disabled:cursor-not-allowed"
+            className="h-16 rounded-2xl bg-white hover:bg-slate-100 active:bg-emerald-50 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:active:bg-emerald-500/20 active:scale-95 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-2xl font-semibold tracking-wider text-slate-800 dark:text-slate-100 flex items-center justify-center transition-all duration-150 shadow-xs disabled:cursor-not-allowed"
           >
             {num}
           </button>
@@ -304,7 +303,7 @@ export function PinLockScreen({
           onClick={handleClear}
           disabled={isLockedOut}
           type="button"
-          className="h-16 rounded-2xl bg-transparent active:bg-slate-900 text-xs font-medium uppercase tracking-wider text-slate-500 hover:text-slate-300 flex items-center justify-center transition-all disabled:opacity-30"
+          className="h-16 rounded-2xl bg-transparent active:bg-slate-200 dark:active:bg-slate-900 text-xs font-medium uppercase tracking-wider text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center transition-all disabled:opacity-30"
         >
           Clear
         </button>
@@ -314,7 +313,7 @@ export function PinLockScreen({
           onClick={() => handleDigit('0')}
           disabled={isLockedOut}
           type="button"
-          className="h-16 rounded-2xl bg-slate-900/80 hover:bg-slate-800 active:bg-emerald-500/20 active:scale-95 border border-slate-800 hover:border-slate-700 text-2xl font-semibold tracking-wider text-slate-100 flex items-center justify-center transition-all duration-150 shadow-sm disabled:cursor-not-allowed"
+          className="h-16 rounded-2xl bg-white hover:bg-slate-100 active:bg-emerald-50 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:active:bg-emerald-500/20 active:scale-95 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-2xl font-semibold tracking-wider text-slate-800 dark:text-slate-100 flex items-center justify-center transition-all duration-150 shadow-xs disabled:cursor-not-allowed"
         >
           0
         </button>
@@ -324,7 +323,7 @@ export function PinLockScreen({
           onClick={handleBackspace}
           disabled={isLockedOut}
           type="button"
-          className="h-16 rounded-2xl bg-slate-900/40 hover:bg-slate-800 active:scale-95 border border-slate-800 text-slate-400 hover:text-slate-200 flex items-center justify-center transition-all disabled:opacity-30"
+          className="h-16 rounded-2xl bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200 dark:hover:bg-slate-800 active:scale-95 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center transition-all disabled:opacity-30"
           aria-label="Backspace"
         >
           <Delete className="w-6 h-6" />
@@ -333,7 +332,7 @@ export function PinLockScreen({
 
       {/* Footer Branding */}
       <div className="pb-4 text-center">
-        <span className="text-[11px] uppercase tracking-widest text-slate-600 font-medium">
+        <span className="text-[11px] uppercase tracking-widest text-slate-400 dark:text-slate-600 font-medium">
           Offline Vault • Salted SHA-256 PIN • Anti-Brute Force
         </span>
       </div>
