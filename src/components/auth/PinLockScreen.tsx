@@ -1,9 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Lock, Delete, ShieldAlert, CheckCircle2, KeyRound, AlertOctagon } from 'lucide-react';
+import { Lock, Delete, ShieldAlert, CheckCircle2, KeyRound, AlertOctagon, Fingerprint, ScanFace } from 'lucide-react';
 import { verifyPin, hashPin } from '@/lib/crypto';
 import { db } from '@/lib/db';
+import {
+  setUnlockSession,
+  isBiometricsSupported,
+  isBiometricEnrolled,
+  authenticateWithBiometrics,
+} from '@/lib/sessionAuth';
 
 interface PinLockScreenProps {
   storedHash: string | null;
@@ -30,6 +36,19 @@ export function PinLockScreen({
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [isShaking, setIsShaking] = useState<boolean>(false);
   const [lockoutSecondsLeft, setLockoutSecondsLeft] = useState<number>(0);
+  const [biometricsAvailable, setBiometricsAvailable] = useState<boolean>(false);
+  const [biometricsEnrolled, setBiometricsEnrolled] = useState<boolean>(false);
+  const [biometricLoading, setBiometricLoading] = useState<boolean>(false);
+
+  // Check WebAuthn platform authenticator availability on mount
+  useEffect(() => {
+    isBiometricsSupported().then((supported) => {
+      setBiometricsAvailable(supported);
+      if (supported) {
+        setBiometricsEnrolled(isBiometricEnrolled());
+      }
+    });
+  }, []);
 
   // Check existing lockout on mount
   useEffect(() => {
@@ -102,14 +121,15 @@ export function PinLockScreen({
     }, 500);
   }, []);
 
-  // Clear failed attempts counter on correct unlock
-  const handleSuccessfulUnlock = useCallback(() => {
+  // Clear failed attempts counter on correct unlock and establish persistent session
+  const handleSuccessfulUnlock = useCallback(async () => {
     try {
       localStorage.removeItem(STORAGE_KEY_FAILED);
       localStorage.removeItem(STORAGE_KEY_LOCKOUT);
     } catch (e) {
       // ignore
     }
+    await setUnlockSession();
     setIsSuccess(true);
     if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
       navigator.vibrate(50);
@@ -118,6 +138,41 @@ export function PinLockScreen({
       onUnlock();
     }, 300);
   }, [onUnlock]);
+
+  // Handle 1-Tap Biometric (Fingerprint / Face ID) Quick Unlock
+  const handleBiometricUnlock = async () => {
+    if (lockoutSecondsLeft > 0 || biometricLoading) return;
+    setErrorMsg('');
+
+    if (!biometricsEnrolled) {
+      setErrorMsg('Fingerprint / Face ID not set up yet. Enter your PIN, then enable it in Settings.');
+      return;
+    }
+
+    setBiometricLoading(true);
+    try {
+      const res = await authenticateWithBiometrics();
+      if (res.success) {
+        try {
+          localStorage.removeItem(STORAGE_KEY_FAILED);
+          localStorage.removeItem(STORAGE_KEY_LOCKOUT);
+        } catch (e) {}
+        setIsSuccess(true);
+        if (typeof window !== 'undefined' && 'navigator' in window && navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+        setTimeout(() => {
+          onUnlock();
+        }, 300);
+      } else if (res.error) {
+        setErrorMsg(res.error);
+      }
+    } catch (err: any) {
+      setErrorMsg('Biometric authentication failed. Enter your PIN.');
+    } finally {
+      setBiometricLoading(false);
+    }
+  };
 
   // Handle PIN completion logic
   useEffect(() => {
@@ -130,13 +185,13 @@ export function PinLockScreen({
     const handlePin = async () => {
       if (step === 'enter') {
         if (!storedHash) {
-          handleSuccessfulUnlock();
+          await handleSuccessfulUnlock();
           return;
         }
 
         const isValid = await verifyPin(pin, storedHash);
         if (isValid) {
-          handleSuccessfulUnlock();
+          await handleSuccessfulUnlock();
         } else {
           triggerError('Incorrect PIN. Please try again.');
         }
@@ -152,6 +207,7 @@ export function PinLockScreen({
             pinHash: newHash,
             pinEnabled: true,
           });
+          await setUnlockSession();
           setIsSuccess(true);
           if (onPinCreated) {
             onPinCreated(newHash);
@@ -282,6 +338,25 @@ export function PinLockScreen({
         ) : (
           <div className="h-6" />
         )}
+
+        {/* Optional Biometric Quick Unlock (Fingerprint / Face ID) */}
+        {step === 'enter' && biometricsAvailable && (
+          <button
+            type="button"
+            onClick={handleBiometricUnlock}
+            disabled={isLockedOut || biometricLoading}
+            className="mt-2 mb-1 px-4 py-2 min-h-[40px] rounded-2xl bg-white hover:bg-slate-100 active:bg-emerald-50 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 text-slate-800 dark:text-slate-200 text-xs font-semibold flex items-center gap-2 transition-all shadow-xs active:scale-95 disabled:opacity-30 disabled:pointer-events-none"
+          >
+            <Fingerprint className={`w-4 h-4 ${biometricLoading ? 'text-amber-500 animate-spin' : 'text-emerald-600 dark:text-emerald-400'}`} />
+            <span>
+              {biometricLoading
+                ? 'Verifying Biometrics...'
+                : biometricsEnrolled
+                ? 'Unlock with Fingerprint / Face ID'
+                : 'Unlock with PIN (Enable Biometrics in Settings)'}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Numeric Keypad */}
@@ -298,15 +373,28 @@ export function PinLockScreen({
           </button>
         ))}
 
-        {/* Clear Button */}
-        <button
-          onClick={handleClear}
-          disabled={isLockedOut}
-          type="button"
-          className="h-16 rounded-2xl bg-transparent active:bg-slate-200 dark:active:bg-slate-900 text-xs font-medium uppercase tracking-wider text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center transition-all disabled:opacity-30"
-        >
-          Clear
-        </button>
+        {/* Slot 1: Biometric Quick Button if enrolled, otherwise Clear */}
+        {biometricsAvailable && biometricsEnrolled && step === 'enter' ? (
+          <button
+            onClick={handleBiometricUnlock}
+            disabled={isLockedOut || biometricLoading}
+            type="button"
+            className="h-16 rounded-2xl bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex flex-col items-center justify-center transition-all disabled:opacity-30 active:scale-95 shadow-xs"
+            title="Unlock with Fingerprint / Face ID"
+          >
+            <Fingerprint className="w-5 h-5" />
+            <span className="text-[9px] font-bold uppercase tracking-wider mt-0.5">Biometric</span>
+          </button>
+        ) : (
+          <button
+            onClick={handleClear}
+            disabled={isLockedOut}
+            type="button"
+            className="h-16 rounded-2xl bg-transparent active:bg-slate-200 dark:active:bg-slate-900 text-xs font-medium uppercase tracking-wider text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center transition-all disabled:opacity-30"
+          >
+            Clear
+          </button>
+        )}
 
         {/* Digit 0 */}
         <button

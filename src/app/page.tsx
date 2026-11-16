@@ -39,6 +39,11 @@ import {
 } from '@/lib/types';
 import { registerServiceWorker } from '@/lib/pwa';
 import { pullUnsyncedFromCloud, pushToCloud } from '@/lib/sync';
+import {
+  isSessionUnlocked,
+  recordUserActivity,
+  clearUnlockSession,
+} from '@/lib/sessionAuth';
 import { Sparkles, MessageSquareText, ShieldAlert } from 'lucide-react';
 
 function DashboardContent() {
@@ -78,9 +83,15 @@ function DashboardContent() {
       const currentSettings = await db.app_settings.get('global');
       setSettings(currentSettings || null);
 
-      // Check if locked
+      // Verify Google Pay-style persistent unlock session
       if (currentSettings?.pinEnabled && currentSettings?.pinHash) {
-        setIsLocked(true);
+        const isUnlocked = await isSessionUnlocked(
+          true,
+          currentSettings.autoLockMinutes ?? 5
+        );
+        setIsLocked(!isUnlocked);
+      } else {
+        setIsLocked(false);
       }
 
       const txns = await db.transactions.orderBy('timestamp').reverse().toArray();
@@ -170,35 +181,58 @@ function DashboardContent() {
     }
   }, [searchParams, transactions]);
 
-  // Inactivity Auto-Lock Tracker
+  // Google Pay-Style Inactivity & Background Auto-Lock Tracker
   useEffect(() => {
-    const recordActivity = () => {
+    const handleActivity = () => {
+      recordUserActivity();
       setLastActivity(Date.now());
     };
 
-    window.addEventListener('mousemove', recordActivity);
-    window.addEventListener('keydown', recordActivity);
-    window.addEventListener('touchstart', recordActivity);
-    window.addEventListener('scroll', recordActivity);
+    window.addEventListener('pointerdown', handleActivity, { passive: true });
+    window.addEventListener('keydown', handleActivity, { passive: true });
+    window.addEventListener('touchstart', handleActivity, { passive: true });
+    window.addEventListener('scroll', handleActivity, { passive: true });
 
-    const autoLockMinutes = settings?.autoLockMinutes || 5;
-    const interval = setInterval(() => {
+    // When returning to the app after backgrounding or switching tabs
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        if (settings?.pinEnabled && settings?.pinHash) {
+          const unlocked = await isSessionUnlocked(
+            true,
+            settings.autoLockMinutes ?? 5
+          );
+          if (!unlocked) {
+            setIsLocked(true);
+          } else {
+            recordUserActivity();
+          }
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Periodic check every 10 seconds for idle timeout expiration
+    const interval = setInterval(async () => {
       if (settings?.pinEnabled && settings?.pinHash && !isLocked) {
-        const elapsedMinutes = (Date.now() - lastActivity) / 60000;
-        if (elapsedMinutes >= autoLockMinutes) {
+        const unlocked = await isSessionUnlocked(
+          true,
+          settings.autoLockMinutes ?? 5
+        );
+        if (!unlocked) {
           setIsLocked(true);
         }
       }
-    }, 15000);
+    }, 10000);
 
     return () => {
-      window.removeEventListener('mousemove', recordActivity);
-      window.removeEventListener('keydown', recordActivity);
-      window.removeEventListener('touchstart', recordActivity);
-      window.removeEventListener('scroll', recordActivity);
+      window.removeEventListener('pointerdown', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+      window.removeEventListener('scroll', handleActivity);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearInterval(interval);
     };
-  }, [settings, isLocked, lastActivity]);
+  }, [settings, isLocked]);
 
   // Check incoming transaction for IOU match
   const checkAutoSettlement = async (txn: Transaction) => {
@@ -272,6 +306,7 @@ function DashboardContent() {
         storedHash={settings?.pinHash || null}
         onUnlock={() => {
           setIsLocked(false);
+          recordUserActivity();
           setLastActivity(Date.now());
         }}
       />
@@ -282,7 +317,10 @@ function DashboardContent() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors w-full max-w-full overflow-x-clip min-w-0">
       {/* Top Header */}
       <Header
-        onLockApp={() => setIsLocked(true)}
+        onLockApp={() => {
+          clearUnlockSession();
+          setIsLocked(true);
+        }}
         isPinEnabled={Boolean(settings?.pinEnabled && settings?.pinHash)}
         onOpenPinSettings={() => setShowPinSettingsModal(true)}
         onOpenParentShare={() => setActiveTab('settings')}

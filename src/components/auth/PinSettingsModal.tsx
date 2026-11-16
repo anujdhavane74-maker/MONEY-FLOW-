@@ -1,10 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Lock, KeyRound, ShieldCheck, ShieldAlert, X, Clock, Trash2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Lock, KeyRound, ShieldCheck, ShieldAlert, X, Clock, Trash2, Fingerprint, CheckCircle2 } from 'lucide-react';
 import { hashPin, verifyPin } from '@/lib/crypto';
 import { db } from '@/lib/db';
 import { AppSettings } from '@/lib/types';
+import {
+  isBiometricsSupported,
+  isBiometricEnrolled,
+  enrollBiometrics,
+  disableBiometrics,
+} from '@/lib/sessionAuth';
 
 interface PinSettingsModalProps {
   settings: AppSettings | null;
@@ -16,10 +22,22 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
   const [currentPin, setCurrentPin] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
-  const [autoLockMinutes, setAutoLockMinutes] = useState(settings?.autoLockMinutes || 5);
+  const [autoLockMinutes, setAutoLockMinutes] = useState(settings?.autoLockMinutes ?? 5);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [mode, setMode] = useState<'view' | 'change' | 'create'>('view');
+  const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  const [biometricsEnrolled, setBiometricsEnrolled] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(false);
+
+  useEffect(() => {
+    isBiometricsSupported().then((supported) => {
+      setBiometricsAvailable(supported);
+      if (supported) {
+        setBiometricsEnrolled(isBiometricEnrolled());
+      }
+    });
+  }, []);
 
   const isPinEnabled = Boolean(settings?.pinEnabled && settings?.pinHash);
 
@@ -92,6 +110,30 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
       autoLockMinutes: mins,
     });
     onUpdated();
+  };
+
+  const handleToggleBiometrics = async () => {
+    if (biometricLoading) return;
+    setError('');
+    setSuccess('');
+
+    if (biometricsEnrolled) {
+      disableBiometrics();
+      setBiometricsEnrolled(false);
+      setSuccess('Biometric unlock disabled.');
+      return;
+    }
+
+    setBiometricLoading(true);
+    const res = await enrollBiometrics();
+    setBiometricLoading(false);
+
+    if (res.success) {
+      setBiometricsEnrolled(true);
+      setSuccess('Fingerprint / Face ID successfully enrolled for 1-tap unlock!');
+    } else if (res.error) {
+      setError(res.error);
+    }
   };
 
   return (
@@ -250,29 +292,81 @@ export function PinSettingsModal({ settings, onClose, onUpdated }: PinSettingsMo
                 {isPinEnabled ? 'Change 4-Digit PIN' : 'Set Up 4-Digit PIN Now'}
               </button>
 
-              {/* Auto-Lock Duration Selection */}
+              {/* Auto-Lock Duration Selection (Google Pay Style) */}
               <div className="pt-2">
-                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5 mb-2">
-                  <Clock className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-                  Auto-Lock Timer (Inactivity)
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex items-center justify-between mb-2">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+                    Auto-Lock Inactivity Timer
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                    {autoLockMinutes === 0 ? 'Never (manual only)' : `Locks after ${autoLockMinutes} min`}
+                  </span>
                 </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {[1, 5, 15, 30].map((mins) => (
+                  {[
+                    { val: 1, label: '1 min' },
+                    { val: 5, label: '5 min' },
+                    { val: 15, label: '15 min' },
+                    { val: 0, label: 'Never' },
+                  ].map((item) => (
                     <button
-                      key={mins}
+                      key={item.val}
                       type="button"
-                      onClick={() => handleUpdateAutoLock(mins)}
+                      onClick={() => handleUpdateAutoLock(item.val)}
                       className={`py-2 rounded-xl text-xs font-medium border transition-all ${
-                        autoLockMinutes === mins
+                        autoLockMinutes === item.val
                           ? 'bg-emerald-50 border-emerald-300 text-emerald-800 font-semibold dark:bg-emerald-500/20 dark:border-emerald-500 dark:text-emerald-300 shadow-xs'
                           : 'bg-slate-50 border-slate-200 text-slate-600 hover:text-slate-900 dark:bg-slate-800/60 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                       }`}
                     >
-                      {mins} min
+                      {item.label}
                     </button>
                   ))}
                 </div>
               </div>
+
+              {/* Biometric Quick Unlock (Fingerprint / Face ID) */}
+              {isPinEnabled && (
+                <div className="pt-2 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <Fingerprint className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+                        Fingerprint / Face ID
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                        {biometricsAvailable
+                          ? biometricsEnrolled
+                            ? '1-tap biometric unlock active'
+                            : 'Enable 1-tap biometric unlock'
+                          : 'Not supported on this browser'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {biometricsAvailable && (
+                    <button
+                      type="button"
+                      onClick={handleToggleBiometrics}
+                      disabled={biometricLoading}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 ${
+                        biometricsEnrolled
+                          ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'
+                          : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-xs'
+                      }`}
+                    >
+                      {biometricLoading
+                        ? 'Enrolling...'
+                        : biometricsEnrolled
+                        ? 'Disable'
+                        : 'Enable'}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>

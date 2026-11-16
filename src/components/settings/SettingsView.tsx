@@ -19,10 +19,12 @@ import {
   Moon,
   Laptop,
   Palette,
+  Fingerprint,
 } from 'lucide-react';
 import { AppSettings, MerchantRule, Category, Transaction } from '@/lib/types';
 import { db } from '@/lib/db';
 import { generateSecureToken } from '@/lib/crypto';
+import { isBiometricEnrolled } from '@/lib/sessionAuth';
 import { MacroDroidGuideModal } from './MacroDroidGuideModal';
 import { DataBackupCard } from './DataBackupCard';
 import { useTheme, Theme } from '@/lib/theme';
@@ -249,9 +251,19 @@ export const SettingsView = memo(function SettingsView({
                 </p>
                 <p className="text-xs opacity-90">
                   {isPinActive
-                    ? `Encrypted PBKDF2 / SHA-256 hash stored with per-device salt. Auto-locks after ${settings?.autoLockMinutes || 5} min of idle time.`
+                    ? `Encrypted PBKDF2 / SHA-256 hash. Auto-locks after ${
+                        settings?.autoLockMinutes === 0
+                          ? 'Never (manual lock only)'
+                          : `${settings?.autoLockMinutes ?? 5} min of inactivity`
+                      }.`
                     : 'We recommend setting a 4-digit code to protect your personal financial records.'}
                 </p>
+                {isPinActive && isBiometricEnrolled() && (
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-1">
+                    <Fingerprint className="w-3.5 h-3.5" />
+                    <span>Fingerprint / Face ID Quick Unlock active on this device</span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
