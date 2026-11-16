@@ -120,23 +120,23 @@ export function QuickCategorizeSheet({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-t-3xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 space-y-4 animate-slide-up max-h-[92vh] overflow-y-auto"
+        className="w-full max-w-lg rounded-t-3xl sm:rounded-2xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 shadow-2xl p-4 sm:p-6 text-slate-900 dark:text-slate-100 space-y-4 animate-slide-up max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle pill for mobile */}
-        <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700/60 rounded-full mx-auto sm:hidden" />
+        <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700/60 rounded-full mx-auto sm:hidden shrink-0" />
 
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-              <Sparkles className="w-5 h-5 animate-spin-slow" />
+        <div className="flex items-start justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 animate-spin-slow" />
             </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block truncate">
                 Instant Prompt
               </span>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Where did you spend this money?</h2>
+              <h2 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white truncate">Where did you spend this?</h2>
             </div>
           </div>
           <button

@@ -109,30 +109,30 @@ export const QuickSpendsBar = memo(function QuickSpendsBar({ presets, onLogged }
   };
 
   return (
-    <div className="space-y-2 select-none">
-      <div className="flex items-center justify-between px-1">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-          <Sparkles className="w-3 h-3 text-emerald-500 dark:text-emerald-400" />
-          1-Tap Frequent Spends:
+    <div className="w-full max-w-full min-w-0 overflow-hidden space-y-2 select-none">
+      <div className="flex items-center justify-between px-1 min-w-0">
+        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate">
+          <Sparkles className="w-3 h-3 text-emerald-500 dark:text-emerald-400 shrink-0" />
+          <span className="truncate">1-Tap Frequent Spends:</span>
         </span>
         <button
           type="button"
           onClick={() => setShowAddPreset(!showAddPreset)}
-          className="text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 flex items-center gap-1 transition-colors"
+          className="text-[10px] sm:text-[11px] font-semibold text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 flex items-center gap-1 transition-colors shrink-0"
         >
           <Plus className="w-3 h-3" />
-          Custom Preset
+          <span>Preset</span>
         </button>
       </div>
 
       {/* Preset Pills Carousel with Snap Scrolling */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x snap-mandatory">
+      <div className="w-full max-w-full min-w-0 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none snap-x snap-mandatory">
         {presets.map((preset) => (
           <button
             key={preset.id}
             type="button"
             onClick={() => handleQuickSpend(preset)}
-            className="snap-start px-3.5 py-2.5 min-h-[44px] rounded-2xl bg-white hover:bg-slate-50 active:bg-emerald-50 active:scale-95 border border-slate-200 hover:border-slate-300 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:active:bg-emerald-500/20 dark:border-slate-800 dark:hover:border-slate-700 flex items-center gap-2 whitespace-nowrap text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all shadow-xs"
+            className="snap-start shrink-0 px-3.5 py-2.5 min-h-[44px] rounded-2xl bg-white hover:bg-slate-50 active:bg-emerald-50 active:scale-95 border border-slate-200 hover:border-slate-300 dark:bg-slate-900/80 dark:hover:bg-slate-800 dark:active:bg-emerald-500/20 dark:border-slate-800 dark:hover:border-slate-700 flex items-center gap-2 whitespace-nowrap text-xs font-semibold text-slate-800 dark:text-slate-200 transition-all shadow-xs"
           >
             <span className="text-emerald-600 dark:text-emerald-400">
               {ICON_MAP[preset.icon] || <Coffee className="w-3.5 h-3.5" />}
@@ -216,19 +216,19 @@ export const QuickSpendsBar = memo(function QuickSpendsBar({ presets, onLogged }
         </div>
       )}
 
-      {/* Floating 3-Second Undo Toast */}
+      {/* Floating 3.5-Second Undo Toast */}
       {undoTxn && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-500/50 shadow-2xl text-xs text-slate-900 dark:text-white animate-slide-up">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse" />
-            <span>
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-500/50 shadow-2xl text-xs text-slate-900 dark:text-white animate-slide-up max-w-[92vw] truncate">
+          <div className="flex items-center gap-1.5 truncate">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0" />
+            <span className="truncate">
               Logged <strong className="font-mono tabular-nums">{formatINR(undoTxn.amount)}</strong> for {undoTxn.name}
             </span>
           </div>
           <button
             type="button"
             onClick={handleUndo}
-            className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-cyan-600 dark:text-cyan-300 font-bold flex items-center gap-1 transition-colors"
+            className="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-cyan-600 dark:text-cyan-300 font-bold flex items-center gap-1 transition-colors shrink-0"
           >
             <RotateCcw className="w-3 h-3" />
             Undo

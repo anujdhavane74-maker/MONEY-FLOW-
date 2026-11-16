@@ -140,79 +140,79 @@ export function BottomNav({
       )}
 
       {/* Fixed Bottom Navigation Bar (Hidden on desktop lg:hidden) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border-t border-slate-200/90 dark:border-slate-800/80 px-2 py-2 select-none transition-colors">
-        <div className="max-w-md mx-auto flex items-center justify-around relative">
-          {/* Dashboard Tab */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-t border-slate-200/90 dark:border-slate-800/80 px-2 pt-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] select-none transition-colors">
+        <div className="max-w-md mx-auto grid grid-cols-5 items-center relative">
+          {/* 1. Home Tab */}
           <button
             type="button"
             onClick={() => onChangeTab('dashboard')}
-            className={`flex flex-col items-center justify-center w-16 min-h-[44px] py-1 transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[44px] py-1 transition-all ${
               activeTab === 'dashboard'
-                ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <LayoutDashboard className="w-5 h-5" />
-            <span className="text-[10px] mt-1">Dashboard</span>
+            <span className="text-[11px] mt-0.5">Home</span>
           </button>
 
-          {/* Transactions Tab */}
+          {/* 2. History Tab */}
           <button
             type="button"
             onClick={() => onChangeTab('transactions')}
-            className={`flex flex-col items-center justify-center w-16 min-h-[44px] py-1 relative transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[44px] py-1 relative transition-all ${
               activeTab === 'transactions'
-                ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <Receipt className="w-5 h-5" />
-            <span className="text-[10px] mt-1">Activity</span>
+            <span className="text-[11px] mt-0.5">History</span>
             {uncategorizedCount > 0 && (
-              <span className="absolute top-0 right-3 w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold flex items-center justify-center animate-pulse">
+              <span className="absolute top-0.5 right-3 w-4 h-4 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold flex items-center justify-center animate-pulse">
                 {uncategorizedCount}
               </span>
             )}
           </button>
 
-          {/* Prominent Elevated Central Add Button */}
-          <div className="relative -top-5 flex items-center gap-1.5">
+          {/* 3. Prominent Elevated Central Add Button */}
+          <div className="relative -top-4 flex items-center justify-center">
             <button
               type="button"
               onClick={() => setShowAddMenu(!showAddMenu)}
-              className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-500 hover:brightness-110 active:scale-95 shadow-lg shadow-emerald-500/25 flex items-center justify-center text-slate-950 font-bold transition-transform p-3.5 min-w-[48px] min-h-[48px]"
-              aria-label="Add or Import"
+              className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-500 hover:brightness-110 active:scale-95 shadow-lg shadow-emerald-500/25 flex items-center justify-center text-slate-950 font-bold transition-transform p-3 min-w-[44px] min-h-[44px]"
+              aria-label="Add or Ingest"
             >
               <Plus className={`w-6 h-6 transition-transform duration-200 ${showAddMenu ? 'rotate-45' : ''}`} />
             </button>
           </div>
 
-          {/* Savings Goals Tab */}
+          {/* 4. Goals Tab */}
           <button
             type="button"
             onClick={() => onChangeTab('savings')}
-            className={`flex flex-col items-center justify-center w-16 min-h-[44px] py-1 transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[44px] py-1 transition-all ${
               activeTab === 'savings'
-                ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <PiggyBank className="w-5 h-5" />
-            <span className="text-[10px] mt-1">Savings</span>
+            <span className="text-[11px] mt-0.5">Goals</span>
           </button>
 
-          {/* Settings Tab */}
+          {/* 5. Settings Tab */}
           <button
             type="button"
             onClick={() => onChangeTab('settings')}
-            className={`flex flex-col items-center justify-center w-16 min-h-[44px] py-1 transition-all ${
+            className={`flex flex-col items-center justify-center min-h-[44px] py-1 transition-all ${
               activeTab === 'settings'
-                ? 'text-emerald-600 dark:text-emerald-400 font-semibold'
+                ? 'text-emerald-600 dark:text-emerald-400 font-bold'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
             }`}
           >
             <Settings className="w-5 h-5" />
-            <span className="text-[10px] mt-1">Settings</span>
+            <span className="text-[11px] mt-0.5">Settings</span>
           </button>
         </div>
       </nav>

@@ -29,13 +29,14 @@ export function SettleIOUPromptModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-slate-900 dark:text-slate-100 space-y-4 animate-slide-up"
+        className="w-full max-w-sm rounded-t-3xl sm:rounded-2xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 shadow-2xl p-5 sm:p-6 text-slate-900 dark:text-slate-100 space-y-4 animate-slide-up max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mb-1 sm:hidden shrink-0" />
         <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />

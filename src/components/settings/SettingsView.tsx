@@ -137,23 +137,23 @@ export const SettingsView = memo(function SettingsView({
   const isPinActive = Boolean(settings?.pinEnabled && settings?.pinHash);
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
+    <div className="space-y-4 sm:space-y-6 animate-fade-in max-w-4xl mx-auto min-w-0 w-full overflow-hidden">
       {/* Theme / Appearance Quick Switcher Card */}
-      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-            <Palette className="w-5 h-5" />
+      <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-colors min-w-0 w-full overflow-hidden">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+            <Palette className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Appearance & Theme</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              High-contrast tokens designed for readability in bright sunlight and dark environments
+          <div className="min-w-0">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">Appearance & Theme</h3>
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+              Adaptive WCAG AA+ contrast for high readability
             </p>
           </div>
         </div>
 
         {/* 3-way Theme Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60">
+        <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 shrink-0 self-start sm:self-auto">
           {(
             [
               { key: 'light', label: 'Light', icon: Sun },
@@ -168,7 +168,7 @@ export const SettingsView = memo(function SettingsView({
                 key={t.key}
                 type="button"
                 onClick={() => setTheme(t.key)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 min-h-[36px] rounded-xl text-xs font-semibold transition-all ${
                   isSelected
                     ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-xs border border-slate-200/60 dark:border-slate-600'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
@@ -183,12 +183,12 @@ export const SettingsView = memo(function SettingsView({
       </div>
 
       {/* Settings Navigation Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-200 dark:border-slate-800">
+      <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none border-b border-slate-200 dark:border-slate-800 w-full max-w-full min-w-0 snap-x">
         {[
           { key: 'security', label: 'Security & PIN', icon: KeyRound },
-          { key: 'share', label: 'Parent Share Links', icon: Share2 },
-          { key: 'webhook', label: 'MacroDroid & Webhook', icon: Smartphone },
-          { key: 'rules', label: 'Auto-Tagging Rules', icon: Brain },
+          { key: 'share', label: 'Parent Links', icon: Share2 },
+          { key: 'webhook', label: 'SMS Webhook', icon: Smartphone },
+          { key: 'rules', label: 'Auto-Rules', icon: Brain },
           { key: 'data', label: 'Backup & Vault', icon: Database },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -198,13 +198,13 @@ export const SettingsView = memo(function SettingsView({
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key as any)}
-              className={`px-3.5 py-2.5 min-h-[44px] rounded-2xl text-xs font-semibold flex items-center gap-2 whitespace-nowrap transition-all ${
+              className={`snap-start px-3 sm:px-3.5 py-2 min-h-[40px] rounded-2xl text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap transition-all shrink-0 ${
                 isActive
                   ? 'bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-500/15 dark:border-emerald-500/30 dark:text-emerald-400 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/40'
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span>{tab.label}</span>
             </button>
           );
@@ -213,11 +213,11 @@ export const SettingsView = memo(function SettingsView({
 
       {/* 1. Security & PIN Tab */}
       {activeTab === 'security' && (
-        <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-5 transition-colors">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">4-Digit Security PIN & Inactivity Lock</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-4 sm:space-y-5 transition-colors min-w-0 w-full overflow-hidden">
+          <div className="flex items-center justify-between gap-3 min-w-0">
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate">4-Digit Security PIN & Inactivity Lock</h2>
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                 Prevents unauthorized access when lending your phone or browsing in public
               </p>
             </div>

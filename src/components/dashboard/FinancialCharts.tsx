@@ -154,22 +154,22 @@ export const FinancialCharts = memo(function FinancialCharts({ transactions }: F
   };
 
   return (
-    <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-4 transition-colors">
+    <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-3 sm:space-y-4 transition-colors min-w-0 w-full overflow-hidden">
       {/* Header with Switcher */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300">
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="min-w-0">
+          <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-300 truncate">
             {chartView === 'donut' ? 'Spending by Category' : '7-Day Cash Flow'}
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
             {chartView === 'donut'
-              ? 'Where your money flows this month'
-              : 'Income vs. Expense daily comparison'}
+              ? 'Where money flows this month'
+              : 'Income vs. Expense daily'}
           </p>
         </div>
 
         {/* View Switcher Pills */}
-        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/60">
+        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700/60 shrink-0">
           <button
             type="button"
             onClick={() => setChartView('donut')}
@@ -198,7 +198,7 @@ export const FinancialCharts = memo(function FinancialCharts({ transactions }: F
       </div>
 
       {/* Chart Canvas */}
-      <div className="h-64 w-full">
+      <div className="h-64 sm:h-64 w-full min-w-0 overflow-hidden">
         {chartView === 'donut' ? (
           donutData.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-xs">
@@ -206,16 +206,16 @@ export const FinancialCharts = memo(function FinancialCharts({ transactions }: F
               <span>No expense transactions logged this month</span>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row items-center h-full gap-4">
-              <div className="w-full sm:w-1/2 h-52 sm:h-full">
+            <div className="flex flex-col sm:flex-row items-center h-full gap-2 sm:gap-4 min-w-0">
+              <div className="w-full sm:w-1/2 h-44 sm:h-full min-w-0 overflow-hidden">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={donutData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={55}
-                      outerRadius={80}
+                      innerRadius={45}
+                      outerRadius={70}
                       paddingAngle={3}
                       dataKey="value"
                     >
@@ -232,7 +232,7 @@ export const FinancialCharts = memo(function FinancialCharts({ transactions }: F
               </div>
 
               {/* Legend List */}
-              <div className="w-full sm:w-1/2 max-h-52 overflow-y-auto space-y-1.5 pr-2">
+              <div className="w-full sm:w-1/2 max-h-24 sm:max-h-52 overflow-y-auto space-y-1 sm:space-y-1.5 pr-1 min-w-0">
                 {donutData.slice(0, 5).map((entry, index) => {
                   const color =
                     CATEGORY_COLORS[entry.name] ||
@@ -241,18 +241,18 @@ export const FinancialCharts = memo(function FinancialCharts({ transactions }: F
                   return (
                     <div
                       key={entry.name}
-                      className="flex items-center justify-between text-xs py-1.5 px-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/70 border border-slate-200/60 dark:border-transparent transition-colors"
+                      className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/70 border border-slate-200/60 dark:border-transparent transition-colors min-w-0"
                     >
-                      <div className="flex items-center gap-2 truncate">
+                      <div className="flex items-center gap-1.5 truncate min-w-0">
                         <span
-                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: color }}
                         />
                         <span className="text-slate-800 dark:text-slate-300 truncate">{entry.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 pl-1">
                         <span className="font-mono tabular-nums text-slate-900 dark:text-slate-200 font-semibold">{formatINR(entry.value)}</span>
-                        <span className="text-[10px] tabular-nums text-slate-500 w-7 text-right">{pct}%</span>
+                        <span className="text-[10px] tabular-nums text-slate-500 w-6 text-right">{pct}%</span>
                       </div>
                     </div>
                   );
@@ -264,11 +264,11 @@ export const FinancialCharts = memo(function FinancialCharts({ transactions }: F
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={cashFlowData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
-              <XAxis dataKey="dayLabel" stroke={axisColor} fontSize={11} tickLine={false} />
-              <YAxis stroke={axisColor} fontSize={11} tickLine={false} tickFormatter={(val) => `₹${val}`} />
+              <XAxis dataKey="dayLabel" stroke={axisColor} fontSize={10} tickLine={false} />
+              <YAxis stroke={axisColor} fontSize={10} tickLine={false} tickFormatter={(val) => `₹${val}`} />
               <Tooltip content={<CustomBarTooltip />} />
               <Legend
-                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                wrapperStyle={{ fontSize: 10, paddingTop: 6 }}
                 formatter={(val) => (
                   <span className="text-slate-700 dark:text-slate-300 capitalize">{val}</span>
                 )}

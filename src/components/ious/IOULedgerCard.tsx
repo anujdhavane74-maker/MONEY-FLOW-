@@ -62,65 +62,66 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
   };
 
   return (
-    <div className="p-5 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-xl space-y-4 transition-colors">
+    <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800 shadow-sm dark:shadow-xl space-y-3.5 sm:space-y-4 transition-colors min-w-0 w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-2xl bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-            <Users className="w-5 h-5" />
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-                Split & IOU Ledger
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 truncate">
+                Split & IOUs
               </h2>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-800/60 text-cyan-800 dark:text-cyan-300 font-bold tabular-nums">
+              <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-800/60 text-cyan-800 dark:text-cyan-300 font-bold tabular-nums shrink-0">
                 {pendingIOUs.length} Pending
               </span>
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Personal spending stays clean while tracking group receivables
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+              Receivables tracked separately from your safe spend
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setShowAddIou(true)}
             className="px-2.5 py-1.5 min-h-[36px] rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1 transition-colors"
           >
             <Plus className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-            <span className="hidden sm:inline">Add IOU</span>
+            <span>Add IOU</span>
           </button>
         </div>
       </div>
 
       {/* Top Total Owed Banner */}
-      <div className="p-3.5 rounded-2xl bg-cyan-50 dark:bg-gradient-to-r dark:from-cyan-950/40 dark:to-blue-950/20 border border-cyan-200 dark:border-cyan-800/40 flex items-center justify-between">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400">
+      <div className="p-3.5 rounded-2xl bg-cyan-50 dark:bg-gradient-to-r dark:from-cyan-950/40 dark:to-blue-950/20 border border-cyan-200 dark:border-cyan-800/40 flex items-center justify-between gap-2 min-w-0">
+        <div className="min-w-0">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-400 block truncate">
             Total Money Owed to You:
           </span>
-          <p className="text-xl font-black font-mono text-cyan-800 dark:text-cyan-300 tabular-nums">
+          <p className="text-lg sm:text-xl font-black font-mono text-cyan-800 dark:text-cyan-300 tabular-nums truncate">
             {formatINR(totalOwedToMe)}
           </p>
         </div>
-        <div className="text-right text-[11px] text-slate-500 dark:text-slate-400">
-          <span>Excluded from personal burn rate</span>
+        <div className="text-right text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
+          <span>Kept off burn rate</span>
         </div>
       </div>
 
-      {/* Manual IOU Modal */}
+      {/* Manual IOU Modal (Bottom-sheet on mobile) */}
       {showAddIou && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in"
           onClick={() => setShowAddIou(false)}
         >
           <div
-            className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 text-slate-900 dark:text-slate-100 space-y-3 shadow-2xl"
+            className="w-full max-w-sm rounded-t-3xl sm:rounded-2xl bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 p-4 sm:p-5 text-slate-900 dark:text-slate-100 space-y-3 shadow-2xl max-h-[90dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mb-2 sm:hidden shrink-0" />
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-900 dark:text-white">Record Pending IOU</span>
               <button
@@ -180,7 +181,7 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
       )}
 
       {/* List of Pending Friends */}
-      <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
+      <div className="divide-y divide-slate-100 dark:divide-slate-800/80 min-w-0">
         {pendingIOUs.length === 0 ? (
           <p className="text-xs text-slate-400 dark:text-slate-500 py-3 text-center">
             No pending IOUs! All shared expenses are settled.
@@ -189,29 +190,29 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
           pendingIOUs.map((iou) => (
             <div
               key={iou.id}
-              className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/30 px-2 rounded-2xl transition-colors"
+              className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/30 px-1 sm:px-2 rounded-2xl transition-colors min-w-0"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-300 dark:border-cyan-500/30 flex items-center justify-center font-bold text-xs text-cyan-800 dark:text-cyan-300">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-300 dark:border-cyan-500/30 flex items-center justify-center font-bold text-xs text-cyan-800 dark:text-cyan-300 shrink-0">
                   {iou.personName.charAt(0).toUpperCase()}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{iou.personName}</span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono tabular-nums">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                    <span className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate max-w-[130px] xs:max-w-[180px] sm:max-w-xs">{iou.personName}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono tabular-nums shrink-0">
                       {formatISTDate(iou.createdAt)}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{iou.description}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[150px] xs:max-w-[200px] sm:max-w-xs">{iou.description}</p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between sm:justify-end gap-3 pl-11 sm:pl-0">
-                <span className="text-sm font-black font-mono text-cyan-700 dark:text-cyan-300 tabular-nums">
+              <div className="flex items-center justify-between sm:justify-end gap-2.5 pl-10 sm:pl-0 shrink-0">
+                <span className="text-sm font-black font-mono text-cyan-700 dark:text-cyan-300 tabular-nums shrink-0">
                   {formatINR(iou.amount)}
                 </span>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 shrink-0">
                   {/* WhatsApp Reminder Button */}
                   <button
                     type="button"

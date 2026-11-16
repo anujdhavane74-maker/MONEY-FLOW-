@@ -282,30 +282,30 @@ export function DataBackupCard({ onRefresh }: DataBackupCardProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 min-w-0 w-full overflow-hidden">
       {/* Toast Notification */}
       {successToast && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-          <span>{successToast}</span>
+        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-fade-in min-w-0">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span className="truncate">{successToast}</span>
         </div>
       )}
 
       {/* Cloud Sync State */}
-      <div className="p-5 rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-            <Cloud className="w-5 h-5" />
+      <div className="p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-colors min-w-0 w-full overflow-hidden">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-cyan-100 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+            <Cloud className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              Cloud Persistence & Webhook Sync
-              <span className="px-2 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-800/40 text-[10px] text-cyan-800 dark:text-cyan-300 font-medium">
+          <div className="min-w-0">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 truncate">
+              <span>Cloud Persistence</span>
+              <span className="px-1.5 py-0.5 rounded-full bg-cyan-100 dark:bg-cyan-950/60 border border-cyan-300 dark:border-cyan-800/40 text-[9px] sm:text-[10px] text-cyan-800 dark:text-cyan-300 font-medium shrink-0">
                 Active
               </span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Syncs with server queue & Supabase so incoming SMS webhooks and Parent Links work seamlessly across devices.
+            <p className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+              Cross-device synchronization for webhooks and parent links.
             </p>
           </div>
         </div>
@@ -314,21 +314,21 @@ export function DataBackupCard({ onRefresh }: DataBackupCardProps) {
           type="button"
           onClick={handleCloudSync}
           disabled={syncing}
-          className="px-4 py-2.5 min-h-[40px] rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-sm"
+          className="px-3.5 sm:px-4 py-2 sm:py-2.5 min-h-[38px] rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-sm shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin' : ''}`} />
-          {syncing ? 'Syncing...' : 'Sync Now'}
+          <span>{syncing ? 'Syncing...' : 'Sync Now'}</span>
         </button>
       </div>
 
       {syncMessage && (
-        <p className="text-xs text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30 p-2.5 rounded-xl">
+        <p className="text-xs text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30 p-2.5 rounded-xl truncate">
           {syncMessage}
         </p>
       )}
 
       {/* Export & Restore Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 min-w-0">
         {/* Export JSON */}
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col justify-between space-y-3 shadow-xs">
           <div className="space-y-1">
@@ -435,10 +435,11 @@ export function DataBackupCard({ onRefresh }: DataBackupCardProps) {
         </button>
       </div>
 
-      {/* Confirmation Reset Demo Data Modal */}
+      {/* Confirmation Reset Demo Data Modal (Bottom-sheet on mobile) */}
       {showResetConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90dvh] overflow-y-auto">
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mb-2 sm:hidden shrink-0" />
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <AlertTriangle className="w-5 h-5" />
@@ -490,10 +491,11 @@ export function DataBackupCard({ onRefresh }: DataBackupCardProps) {
         </div>
       )}
 
-      {/* Confirmation Restore Modal */}
+      {/* Confirmation Restore Modal (Bottom-sheet on mobile) */}
       {restoreModalData && (
-        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 border-t sm:border border-slate-200 dark:border-slate-800 rounded-t-3xl sm:rounded-2xl p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90dvh] overflow-y-auto">
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto mb-2 sm:hidden shrink-0" />
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
                 <AlertTriangle className="w-5 h-5" />

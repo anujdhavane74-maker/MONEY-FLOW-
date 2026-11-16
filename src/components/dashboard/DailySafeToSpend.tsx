@@ -62,13 +62,13 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
   };
 
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none space-y-4 flex flex-col justify-between h-full">
+    <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none space-y-3.5 sm:space-y-4 flex flex-col justify-between h-full min-w-0 w-full overflow-hidden">
       {/* Top Banner */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2.5">
+      <div className="min-w-0">
+        <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center border shadow-sm ${
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center border shadow-xs shrink-0 ${
                 isOverspentToday
                   ? 'bg-rose-50 border-rose-200 text-rose-600 dark:bg-rose-500/10 dark:border-rose-500/30 dark:text-rose-400'
                   : percentToday > 75
@@ -77,24 +77,24 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
               }`}
             >
               {isOverspentToday ? (
-                <Flame className="w-5 h-5 animate-pulse" />
+                <Flame className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
               ) : percentToday > 75 ? (
-                <AlertTriangle className="w-5 h-5" />
+                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
               ) : (
-                <ShieldCheck className="w-5 h-5" />
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-                  Daily Safe-to-Spend
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100 truncate">
+                  Safe-to-Spend
                 </h2>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-semibold border border-slate-200 dark:border-slate-700">
-                  {daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left
+                <span className="text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-cyan-700 dark:text-cyan-300 font-semibold border border-slate-200 dark:border-slate-700 shrink-0">
+                  {daysRemaining}d left
                 </span>
               </div>
-              <p className="text-[11px] text-slate-600 dark:text-slate-400">
-                Protects {formatINR(fixedRecurringBills)} rent & recurring bills
+              <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400 truncate">
+                Protects {formatINR(fixedRecurringBills)} bills
               </p>
             </div>
           </div>
@@ -102,8 +102,9 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
           <button
             type="button"
             onClick={() => setShowConfig(!showConfig)}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors shrink-0"
             title="Configure Budget & Fixed Bills"
+            aria-label="Configure Budget"
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -160,44 +161,44 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
         )}
 
         {/* 3 Metrics: Today's Limit, Spent Today, Remaining Today */}
-        <div className="grid grid-cols-3 gap-2 py-1">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-2 py-1 min-w-0">
           {/* Today's Limit */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
+          <div className="p-2 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-center min-w-0 overflow-hidden">
+            <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 block truncate">
               Today&apos;s Limit
             </span>
-            <p className="text-base sm:text-lg font-black font-mono text-slate-900 dark:text-slate-200 tabular-nums mt-0.5">
+            <p className="text-xs sm:text-base md:text-lg font-black font-mono text-slate-900 dark:text-slate-200 tabular-nums mt-0.5 truncate">
               {formatINR(dailySafeLimit)}
             </p>
           </div>
 
           {/* Spent Today */}
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-center">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
+          <div className="p-2 sm:p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-center min-w-0 overflow-hidden">
+            <span className="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 block truncate">
               Spent Today
             </span>
-            <p className="text-base sm:text-lg font-black font-mono text-rose-600 dark:text-rose-400 tabular-nums mt-0.5">
+            <p className="text-xs sm:text-base md:text-lg font-black font-mono text-rose-600 dark:text-rose-400 tabular-nums mt-0.5 truncate">
               {formatINR(spentToday)}
             </p>
           </div>
 
           {/* Remaining Today */}
           <div
-            className={`p-3 rounded-xl border text-center ${
+            className={`p-2 sm:p-3 rounded-xl border text-center min-w-0 overflow-hidden ${
               isOverspentToday
                 ? 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800/50'
                 : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/50'
             }`}
           >
             <span
-              className={`text-[10px] font-semibold uppercase tracking-wider block ${
+              className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider block truncate ${
                 isOverspentToday ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'
               }`}
             >
               {isOverspentToday ? 'Over Limit' : 'Left Today'}
             </span>
             <p
-              className={`text-base sm:text-lg font-black font-mono tabular-nums mt-0.5 ${
+              className={`text-xs sm:text-base md:text-lg font-black font-mono tabular-nums mt-0.5 truncate ${
                 isOverspentToday ? 'text-rose-700 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'
               }`}
             >
@@ -208,8 +209,8 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
       </div>
 
       {/* Visual Progress Bar */}
-      <div className="space-y-1.5 pt-1">
-        <div className="w-full h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
+      <div className="space-y-1.5 pt-1 min-w-0">
+        <div className="w-full h-2 sm:h-2.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
               isOverspentToday
@@ -222,14 +223,14 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
           />
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-slate-400">
-          <span>{percentToday}% burned today</span>
-          <span>
+        <div className="flex items-center justify-between gap-1 text-[10px] sm:text-[11px] text-slate-600 dark:text-slate-400 min-w-0">
+          <span className="shrink-0">{percentToday}% burned today</span>
+          <span className="truncate text-right">
             {isOverspentToday ? (
-              <span className="text-rose-600 dark:text-rose-400 font-semibold">Exceeded safe pace</span>
+              <span className="text-rose-600 dark:text-rose-400 font-semibold truncate">Exceeded safe pace</span>
             ) : (
-              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                On pace for {formatINR(netDiscretionaryPool)} surplus
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold truncate">
+                On pace for {formatINR(netDiscretionaryPool)}
               </span>
             )}
           </span>

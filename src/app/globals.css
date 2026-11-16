@@ -19,6 +19,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -26,6 +33,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   padding-bottom: env(safe-area-inset-bottom, 1rem);
+  width: 100%;
 }
 
 /* Force tabular figures for aligned INR currencies */

@@ -279,7 +279,7 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors w-full max-w-full overflow-x-clip min-w-0">
       {/* Top Header */}
       <Header
         onLockApp={() => setIsLocked(true)}
@@ -293,17 +293,17 @@ function DashboardContent() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-12 space-y-6">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-12 space-y-4 sm:space-y-6 overflow-x-clip min-w-0">
         {/* Uncategorized Prompt Notification Banner */}
         {uncategorizedCount > 0 && (
-          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between text-xs animate-fade-in shadow-xs">
-            <div className="flex items-center gap-2.5">
-              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-spin-slow" />
-              <div>
-                <p className="font-bold text-amber-800 dark:text-amber-300">
+          <div className="p-3 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between gap-3 text-xs animate-fade-in shadow-xs min-w-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-bold text-amber-800 dark:text-amber-300 truncate">
                   {uncategorizedCount} Pending Transaction{uncategorizedCount > 1 ? 's' : ''} Need Categorization
                 </p>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-slate-600 dark:text-slate-400 truncate">
                   Tap to 1-click categorize where your money was spent.
                 </p>
               </div>
@@ -314,7 +314,7 @@ function DashboardContent() {
                 const target = transactions.find((t) => !t.isCategorized);
                 if (target) setActivePromptTxn(target);
               }}
-              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all shadow-xs"
+              className="shrink-0 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition-all shadow-xs"
             >
               Categorize
             </button>
@@ -323,10 +323,10 @@ function DashboardContent() {
 
         {/* Tab 1: Dashboard (12-Column Responsive Bento Grid on >=1024px) */}
         {activeTab === 'dashboard' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
             {/* Top Row: Daily Safe-to-Spend (5 cols) + Summary Cards (7 cols, 2x2 grid inside) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-stretch">
-              <div className="lg:col-span-5 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 lg:gap-6 items-stretch min-w-0 w-full">
+              <div className="lg:col-span-5 h-full min-w-0">
                 <DailySafeToSpend
                   monthlyBudget={settings?.monthlyBudget || 25000}
                   fixedRecurringBills={fixedRecurringToUse}
@@ -335,7 +335,7 @@ function DashboardContent() {
                   onBudgetUpdated={loadData}
                 />
               </div>
-              <div className="lg:col-span-7 h-full flex flex-col justify-between">
+              <div className="lg:col-span-7 h-full flex flex-col justify-between min-w-0">
                 <SummaryCards
                   currentBalance={currentBalance}
                   totalIncome={totalIncome}
@@ -346,14 +346,14 @@ function DashboardContent() {
             </div>
 
             {/* Second Row: 1-Tap Frequent Spends Speed Dial (Full 12 Columns) */}
-            <div className="w-full">
+            <div className="w-full min-w-0 overflow-hidden">
               <QuickSpendsBar presets={presets} onLogged={loadData} />
             </div>
 
             {/* Main Body Bento: Left 7 Columns (Charts & Activity) + Right 5 Columns (Budgets, IOUs, Bills) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 lg:gap-6 items-start min-w-0 w-full">
               {/* Left Column (7 cols): Financial Charts + Recent Transactions Feed */}
-              <div className="lg:col-span-7 space-y-6">
+              <div className="lg:col-span-7 space-y-4 sm:space-y-6 min-w-0">
                 <FinancialCharts transactions={transactions} />
                 <RecentTransactions
                   transactions={transactions.slice(0, 8)}
@@ -364,7 +364,7 @@ function DashboardContent() {
               </div>
 
               {/* Right Column (5 cols): Category Budget Gauges + Split & IOUs + Recurring Bills */}
-              <div className="lg:col-span-5 space-y-6">
+              <div className="lg:col-span-5 space-y-4 sm:space-y-6 min-w-0">
                 <CategoryBudgetGauges categories={categories} transactions={transactions} />
                 <IOULedgerCard ious={ious} onRefresh={loadData} />
                 <RecurringBillsCard bills={bills} onRefresh={loadData} />
@@ -375,7 +375,7 @@ function DashboardContent() {
 
         {/* Tab 2: Activity (Full Transactions, IOUs & Recurring Bills) */}
         {activeTab === 'transactions' && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
             <RecurringBillsCard bills={bills} onRefresh={loadData} />
             <IOULedgerCard ious={ious} onRefresh={loadData} />
             <RecentTransactions
@@ -389,23 +389,27 @@ function DashboardContent() {
 
         {/* Tab 3: Savings Goals */}
         {activeTab === 'savings' && (
-          <SavingsGoalsView goals={savingsGoals} onRefresh={loadData} />
+          <div className="min-w-0 w-full">
+            <SavingsGoalsView goals={savingsGoals} onRefresh={loadData} />
+          </div>
         )}
 
         {/* Tab 4: Settings & Parent Links */}
         {activeTab === 'settings' && (
-          <SettingsView
-            settings={settings}
-            categories={categories}
-            merchantRules={merchantRules}
-            onOpenPinSettings={() => setShowPinSettingsModal(true)}
-            onRefresh={loadData}
-            onSimulateWebhook={(txn) => {
-              loadData();
-              checkAutoSettlement(txn);
-              setActivePromptTxn(txn);
-            }}
-          />
+          <div className="min-w-0 w-full">
+            <SettingsView
+              settings={settings}
+              categories={categories}
+              merchantRules={merchantRules}
+              onOpenPinSettings={() => setShowPinSettingsModal(true)}
+              onRefresh={loadData}
+              onSimulateWebhook={(txn) => {
+                loadData();
+                checkAutoSettlement(txn);
+                setActivePromptTxn(txn);
+              }}
+            />
+          </div>
         )}
       </main>
 
