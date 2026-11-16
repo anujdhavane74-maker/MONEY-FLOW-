@@ -1,0 +1,277 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+} from 'recharts';
+import { PieChart as PieIcon, BarChart3 } from 'lucide-react';
+import { Transaction } from '@/lib/types';
+import { formatINR } from '@/lib/formatters';
+
+interface FinancialChartsProps {
+  transactions: Transaction[];
+}
+
+const CATEGORY_COLORS: Record<string, string> = {
+  'Food & Dining': '#f97316',
+  'Shopping': '#ec4899',
+  'Travel & Transit': '#06b6d4',
+  'Stationery & Education': '#8b5cf6',
+  'Rent & Bills': '#ef4444',
+  'Subscriptions & Gaming': '#a855f7',
+  'Transfers': '#64748b',
+  'Savings & Investments': '#10b981',
+  'Other': '#94a3b8',
+};
+
+const FALLBACK_COLORS = [
+  '#f97316',
+  '#06b6d4',
+  '#ec4899',
+  '#8b5cf6',
+  '#10b981',
+  '#f59e0b',
+  '#3b82f6',
+  '#ef4444',
+];
+
+export function FinancialCharts({ transactions }: FinancialChartsProps) {
+  const [mounted, setMounted] = useState(false);
+  const [chartView, setChartView] = useState<'donut' | 'cashflow'>('donut');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="h-64 rounded-3xl bg-slate-900/60 border border-slate-800 flex items-center justify-center text-slate-500 text-xs">
+        Loading visualizations...
+      </div>
+    );
+  }
+
+  // 1. Prepare Category Donut Data (Expenses this month)
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const currentMonthExpenses = transactions.filter((t) => {
+    const d = new Date(t.timestamp);
+    return t.type === 'expense' && d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const catMap: Record<string, number> = {};
+  currentMonthExpenses.forEach((t) => {
+    catMap[t.category] = (catMap[t.category] || 0) + t.amount;
+  });
+
+  const donutData = Object.entries(catMap)
+    .map(([name, value]) => ({
+      name,
+      value,
+    }))
+    .sort((a, b) => b.value - a.value);
+
+  const totalExpenseVal = donutData.reduce((sum, d) => sum + d.value, 0);
+
+  // 2. Prepare Cash Flow Data (Last 7 Days)
+  const dayBuckets: Record<string, { dayLabel: string; income: number; expense: number }> = {};
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    const dayLabel = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric' });
+    dayBuckets[key] = { dayLabel, income: 0, expense: 0 };
+  }
+
+  transactions.forEach((t) => {
+    const d = new Date(t.timestamp);
+    const key = d.toISOString().slice(0, 10);
+    if (dayBuckets[key]) {
+      if (t.type === 'income') {
+        dayBuckets[key].income += t.amount;
+      } else if (t.type === 'expense') {
+        dayBuckets[key].expense += t.amount;
+      }
+    }
+  });
+
+  const cashFlowData = Object.values(dayBuckets);
+
+  // Custom Donut Tooltip
+  const CustomDonutTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      const pct = totalExpenseVal > 0 ? ((data.value / totalExpenseVal) * 100).toFixed(1) : 0;
+      return (
+        <div className="bg-slate-900 border border-slate-700/80 p-2.5 rounded-xl shadow-xl text-xs">
+          <p className="font-semibold text-slate-200">{data.name}</p>
+          <p className="text-emerald-400 font-bold font-mono mt-0.5">{formatINR(data.value)}</p>
+          <p className="text-slate-400 text-[10px] mt-0.5">{pct}% of monthly spend</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom Cashflow Tooltip
+  const CustomBarTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-slate-900 border border-slate-700/80 p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+          <p className="font-semibold text-slate-300">{label}</p>
+          {payload.map((entry: any, index: number) => (
+            <p
+              key={`item-${index}`}
+              className="font-mono text-xs font-medium"
+              style={{ color: entry.color }}
+            >
+              {entry.name}: {formatINR(entry.value)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="p-5 rounded-3xl bg-slate-900/70 border border-slate-800/80 shadow-lg space-y-4">
+      {/* Header with Switcher */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-300">
+            {chartView === 'donut' ? 'Spending by Category' : '7-Day Cash Flow'}
+          </h2>
+          <p className="text-xs text-slate-400">
+            {chartView === 'donut'
+              ? 'Where your money flows this month'
+              : 'Income vs. Expense daily comparison'}
+          </p>
+        </div>
+
+        {/* View Switcher Pills */}
+        <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-2xl border border-slate-700/60">
+          <button
+            type="button"
+            onClick={() => setChartView('donut')}
+            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              chartView === 'donut'
+                ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <PieIcon className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Category</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setChartView('cashflow')}
+            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              chartView === 'cashflow'
+                ? 'bg-emerald-500 text-slate-950 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <BarChart3 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Flow</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Chart Canvas */}
+      <div className="h-64 w-full">
+        {chartView === 'donut' ? (
+          donutData.length === 0 ? (
+            <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs">
+              <PieIcon className="w-8 h-8 mb-2 opacity-30" />
+              <span>No expense transactions logged this month</span>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-center h-full gap-4">
+              <div className="w-full sm:w-1/2 h-52 sm:h-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={donutData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {donutData.map((entry, index) => {
+                        const color =
+                          CATEGORY_COLORS[entry.name] ||
+                          FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+                        return <Cell key={`cell-${index}`} fill={color} stroke="#0f172a" strokeWidth={2} />;
+                      })}
+                    </Pie>
+                    <Tooltip content={<CustomDonutTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Legend List */}
+              <div className="w-full sm:w-1/2 max-h-52 overflow-y-auto space-y-1.5 pr-2">
+                {donutData.slice(0, 5).map((entry, index) => {
+                  const color =
+                    CATEGORY_COLORS[entry.name] ||
+                    FALLBACK_COLORS[index % FALLBACK_COLORS.length];
+                  const pct = totalExpenseVal > 0 ? Math.round((entry.value / totalExpenseVal) * 100) : 0;
+                  return (
+                    <div
+                      key={entry.name}
+                      className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-slate-800/40 hover:bg-slate-800/70 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-slate-300 truncate">{entry.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="font-mono text-slate-200 font-semibold">{formatINR(entry.value)}</span>
+                        <span className="text-[10px] text-slate-500 w-7 text-right">{pct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={cashFlowData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <XAxis dataKey="dayLabel" stroke="#64748b" fontSize={11} tickLine={false} />
+              <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(val) => `₹${val}`} />
+              <Tooltip content={<CustomBarTooltip />} />
+              <Legend
+                wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+                formatter={(val) => (
+                  <span className="text-slate-300 capitalize">{val}</span>
+                )}
+              />
+              <Bar dataKey="income" name="Income" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+    </div>
+  );
+}
