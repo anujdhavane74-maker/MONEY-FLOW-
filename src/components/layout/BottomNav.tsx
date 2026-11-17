@@ -12,9 +12,10 @@ import {
   X,
   Mic,
   TrendingUp,
+  Users,
 } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'transactions' | 'analytics' | 'savings' | 'settings';
+export type TabType = 'dashboard' | 'transactions' | 'splits' | 'analytics' | 'savings' | 'settings';
 
 interface BottomNavProps {
   activeTab: TabType;
@@ -134,6 +135,28 @@ export function BottomNav({
               <div>
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Import Statement (CSV / PDF)</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Google Pay reconciliation with deduplication</p>
+              </div>
+            </button>
+
+            {/* Option 4: Sarcastic Split & IOU Hub */}
+            <button
+              onClick={() => {
+                setShowAddMenu(false);
+                onChangeTab('splits');
+              }}
+              className="w-full min-h-[48px] p-3.5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100/80 dark:hover:bg-cyan-900/40 border border-cyan-200 dark:border-cyan-800/50 flex items-center gap-3.5 transition-all text-left"
+            >
+              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                <Users className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">Splits & IOU Recovery Hub</p>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-bold">
+                    Roast 💸
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Collect pending debts with sarcastic cards</p>
               </div>
             </button>
           </div>

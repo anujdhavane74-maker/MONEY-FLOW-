@@ -17,6 +17,7 @@ import {
   Clock,
   X,
   CreditCard,
+  Users,
 } from 'lucide-react';
 import { TabType } from './BottomNav';
 import { Transaction } from '@/lib/types';
@@ -139,6 +140,18 @@ export function CommandPaletteModal({
       action: () => {
         onClose();
         onNavigate('transactions');
+      },
+    },
+    {
+      id: 'cmd-nav-splits',
+      title: 'Go to Splits & IOU Recovery Hub',
+      subtitle: 'Sarcastic reminder studio, debtor leaderboard & settle debt',
+      icon: <Users className="w-4 h-4 text-cyan-500" />,
+      shortcut: 'S',
+      category: 'Navigation',
+      action: () => {
+        onClose();
+        onNavigate('splits');
       },
     },
     {

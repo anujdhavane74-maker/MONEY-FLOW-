@@ -20,6 +20,7 @@ import {
   Wifi,
   WifiOff,
   User as UserIcon,
+  Users,
 } from 'lucide-react';
 import { TabType } from './BottomNav';
 import { useAuth } from '@/lib/authContext';
@@ -35,6 +36,7 @@ interface DesktopSidebarProps {
   onOpenCommandPalette: () => void;
   onLockApp: () => void;
   uncategorizedCount?: number;
+  pendingIousCount?: number;
   isOnline?: boolean;
 }
 
@@ -47,6 +49,7 @@ export function DesktopSidebar({
   onOpenCommandPalette,
   onLockApp,
   uncategorizedCount = 0,
+  pendingIousCount = 0,
   isOnline = true,
 }: DesktopSidebarProps) {
   const { user, signOut, isConfigured } = useAuth();
@@ -65,6 +68,13 @@ export function DesktopSidebar({
       label: 'Activity',
       icon: Receipt,
       badge: uncategorizedCount > 0 ? uncategorizedCount : null,
+    },
+    {
+      id: 'splits' as TabType,
+      label: 'Splits & IOUs',
+      icon: Users,
+      badge: pendingIousCount > 0 ? pendingIousCount : null,
+      isCyanBadge: true,
     },
     {
       id: 'analytics' as TabType,
@@ -163,7 +173,11 @@ export function DesktopSidebar({
                 <span>{item.label}</span>
               </div>
               {item.badge !== null && (
-                <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-bold flex items-center justify-center animate-pulse">
+                <span className={`w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center ${
+                  item.isCyanBadge
+                    ? 'bg-cyan-500 text-slate-950 shadow-xs'
+                    : 'bg-amber-500 text-slate-950 animate-pulse'
+                }`}>
                   {item.badge}
                 </span>
               )}

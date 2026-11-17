@@ -6,22 +6,41 @@ import {
   CheckCircle2,
   Plus,
   X,
+  Flame,
+  ArrowRight,
   MessageCircle,
 } from 'lucide-react';
 import { IOU } from '@/lib/types';
 import { formatINR, formatISTDate } from '@/lib/formatters';
 import { db, settleIOU } from '@/lib/db';
+import { SarcasticCardStudioModal } from './SarcasticCardStudioModal';
 
 interface IOULedgerCardProps {
   ious: IOU[];
   onRefresh: () => void;
+  onOpenSplitsHub?: () => void;
+  defaultUpiId?: string;
+  onSaveUpiId?: (upi: string) => void;
 }
 
-export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IOULedgerCardProps) {
+export const IOULedgerCard = memo(function IOULedgerCard({
+  ious,
+  onRefresh,
+  onOpenSplitsHub,
+  defaultUpiId,
+  onSaveUpiId,
+}: IOULedgerCardProps) {
   const [showAddIou, setShowAddIou] = useState(false);
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [desc, setDesc] = useState('');
+
+  // Sarcastic Roast Studio state
+  const [roastTarget, setRoastTarget] = useState<{
+    friendName: string;
+    friendIOUs: IOU[];
+    selectedIouId?: string;
+  } | null>(null);
 
   const pendingIOUs = ious.filter((i) => i.status === 'pending');
   const totalOwedToMe = pendingIOUs.reduce((sum, i) => sum + i.amount, 0);
@@ -31,13 +50,15 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
     onRefresh();
   };
 
-  const handleSendReminder = (iou: IOU) => {
-    const formattedAmt = formatINR(iou.amount);
-    const dateStr = formatISTDate(iou.createdAt);
-    const text = encodeURIComponent(
-      `Hey ${iou.personName}, just a gentle reminder regarding ${formattedAmt} for ${iou.description} (${dateStr}). You can GPay / UPI me at your convenience! Thanks!`
+  const handleOpenRoast = (iou: IOU) => {
+    const friendIOUs = ious.filter(
+      (i) => i.personName.trim().toLowerCase() === iou.personName.trim().toLowerCase() && i.status === 'pending'
     );
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    setRoastTarget({
+      friendName: iou.personName,
+      friendIOUs: friendIOUs.length > 0 ? friendIOUs : [iou],
+      selectedIouId: iou.id,
+    });
   };
 
   const handleCreateManualIOU = async (e: React.FormEvent) => {
@@ -84,14 +105,14 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={() => setShowAddIou(true)}
             className="px-2.5 py-1.5 min-h-[36px] rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1 transition-colors"
           >
             <Plus className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-            <span>Add IOU</span>
+            <span>Add</span>
           </button>
         </div>
       </div>
@@ -106,9 +127,17 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
             {formatINR(totalOwedToMe)}
           </p>
         </div>
-        <div className="text-right text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
-          <span>Kept off burn rate</span>
-        </div>
+
+        {onOpenSplitsHub && (
+          <button
+            type="button"
+            onClick={onOpenSplitsHub}
+            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 active:scale-95 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-sm transition-all shrink-0"
+          >
+            <Flame className="w-3.5 h-3.5" />
+            <span>Roast & Collect 💸</span>
+          </button>
+        )}
       </div>
 
       {/* Manual IOU Modal (Bottom-sheet on mobile) */}
@@ -187,7 +216,7 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
             No pending IOUs! All shared expenses are settled.
           </p>
         ) : (
-          pendingIOUs.map((iou) => (
+          pendingIOUs.slice(0, 4).map((iou) => (
             <div
               key={iou.id}
               className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-800/30 px-1 sm:px-2 rounded-2xl transition-colors min-w-0"
@@ -213,15 +242,15 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
                 </span>
 
                 <div className="flex items-center gap-1.5 shrink-0">
-                  {/* WhatsApp Reminder Button */}
+                  {/* Sarcastic Card Studio Button */}
                   <button
                     type="button"
-                    onClick={() => handleSendReminder(iou)}
-                    className="px-2.5 py-1.5 min-h-[36px] rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/15 dark:hover:bg-emerald-500/25 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1 transition-colors"
-                    title="Send friendly WhatsApp reminder"
+                    onClick={() => handleOpenRoast(iou)}
+                    className="px-2.5 py-1.5 min-h-[36px] rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/15 dark:hover:bg-amber-500/25 border border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300 text-xs font-bold flex items-center gap-1 transition-colors"
+                    title="Generate sarcastic reminder card"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>Remind</span>
+                    <Flame className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>Roast</span>
                   </button>
 
                   {/* 1-Tap Settle Button */}
@@ -240,6 +269,30 @@ export const IOULedgerCard = memo(function IOULedgerCard({ ious, onRefresh }: IO
           ))
         )}
       </div>
+
+      {/* Footer link to Recovery Hub */}
+      {onOpenSplitsHub && pendingIOUs.length > 0 && (
+        <button
+          type="button"
+          onClick={onOpenSplitsHub}
+          className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5 transition-colors"
+        >
+          <span>Open Full IOU Recovery Hub ({pendingIOUs.length} Pending)</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      )}
+
+      {/* Sarcastic Studio Modal */}
+      {roastTarget && (
+        <SarcasticCardStudioModal
+          friendName={roastTarget.friendName}
+          friendIOUs={roastTarget.friendIOUs}
+          selectedIouId={roastTarget.selectedIouId}
+          defaultUpiId={defaultUpiId}
+          onSaveUpiId={onSaveUpiId}
+          onClose={() => setRoastTarget(null)}
+        />
+      )}
     </div>
   );
 });

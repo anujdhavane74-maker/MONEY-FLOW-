@@ -24,6 +24,7 @@ import {
   User,
   LogOut,
   CheckCircle2,
+  QrCode,
 } from 'lucide-react';
 import { AppSettings, MerchantRule, Category, Transaction } from '@/lib/types';
 import { db } from '@/lib/db';
@@ -69,6 +70,10 @@ export const SettingsView = memo(function SettingsView({
   // New Merchant Rule State
   const [newKeyword, setNewKeyword] = useState('');
   const [newRuleCatId, setNewRuleCatId] = useState(categories[0]?.id || 'cat-food');
+
+  // UPI State for Sarcastic IOU Cards
+  const [upiInput, setUpiInput] = useState(settings?.upiId || '');
+  const [upiSaved, setUpiSaved] = useState(false);
 
   const originUrl = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://money-flow-lac.vercel.app');
   const apiKey = settings?.apiKey || '';
@@ -310,6 +315,56 @@ export const SettingsView = memo(function SettingsView({
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Sarcastic IOU Cards & Quick Repayment UPI ID */}
+          <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-3.5 transition-colors min-w-0 w-full">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <QrCode className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                  Your UPI ID (For Sarcastic IOU Cards & QR Badges)
+                </h2>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Embedded automatically onto shared prescription pads, bank notices, and meme receipts so friends can repay you instantly.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <input
+                type="text"
+                placeholder="e.g. anuj@okhdfcbank or 9823000000@paytm"
+                value={upiInput}
+                onChange={(e) => {
+                  setUpiInput(e.target.value);
+                  setUpiSaved(false);
+                }}
+                className="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white font-mono focus:outline-none focus:border-cyan-500"
+              />
+              <button
+                type="button"
+                onClick={async () => {
+                  await db.app_settings.update('global', { upiId: upiInput.trim() });
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('mf_user_upi_id', upiInput.trim());
+                  }
+                  setUpiSaved(true);
+                  onRefresh();
+                  setTimeout(() => setUpiSaved(false), 2500);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs shrink-0"
+              >
+                {upiSaved ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Saved!</span>
+                  </>
+                ) : (
+                  <span>Save UPI ID</span>
+                )}
+              </button>
             </div>
           </div>
         </div>

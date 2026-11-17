@@ -586,6 +586,26 @@ export async function settleIOU(iouId: string, settlementTxnId?: string) {
 }
 
 /**
+ * Settle all pending IOUs for a specific person
+ */
+export async function settleAllIOUsForPerson(personName: string, settlementTxnId?: string) {
+  const pending = await db.ious
+    .where('status')
+    .equals('pending')
+    .filter((i) => i.personName.trim().toLowerCase() === personName.trim().toLowerCase())
+    .toArray();
+
+  const now = Date.now();
+  for (const iou of pending) {
+    await db.ious.update(iou.id, {
+      status: 'settled',
+      settledAt: now,
+      settledViaTxnId: settlementTxnId,
+    });
+  }
+}
+
+/**
  * Check if incoming credit matches any pending IOU
  */
 export async function findMatchingPendingIOU(senderOrText: string, amount: number): Promise<IOU | null> {

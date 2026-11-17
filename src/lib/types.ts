@@ -130,6 +130,7 @@ export interface AppSettings {
   hideNotesFromParent: boolean; // Privacy setting for Parent Guardian View
   parentShareTokens: ParentShareToken[];
   lastActive: number;
+  upiId?: string; // e.g. user@okhdfcbank for QR badges & quick repayment links
   webhookSecret?: string;
   onboarded?: boolean;
 }

@@ -14,6 +14,7 @@ import { DailySafeToSpend } from '@/components/dashboard/DailySafeToSpend';
 import { QuickSpendsBar } from '@/components/dashboard/QuickSpendsBar';
 import { CategoryBudgetGauges } from '@/components/dashboard/CategoryBudgetGauges';
 import { IOULedgerCard } from '@/components/ious/IOULedgerCard';
+import { SplitsView } from '@/components/ious/SplitsView';
 import { SettleIOUPromptModal } from '@/components/ious/SettleIOUPromptModal';
 import { RecurringBillsCard } from '@/components/bills/RecurringBillsCard';
 import { VoiceExpenseModal } from '@/components/voice/VoiceExpenseModal';
@@ -175,6 +176,11 @@ function DashboardContent() {
   useEffect(() => {
     const action = searchParams.get('action');
     const promptId = searchParams.get('prompt_txn') || searchParams.get('categorize');
+    const tabParam = searchParams.get('tab');
+
+    if (tabParam === 'splits') {
+      setActiveTab('splits');
+    }
 
     if (action === 'add') {
       setShowAddModal(true);
@@ -349,6 +355,7 @@ function DashboardContent() {
           setIsLocked(true);
         }}
         uncategorizedCount={uncategorizedCount}
+        pendingIousCount={ious.filter((i) => i.status === 'pending').length}
       />
 
       {/* Main App Canvas */}
@@ -442,7 +449,16 @@ function DashboardContent() {
               {/* Right Column (5 cols): Category Budget Gauges + Split & IOUs + Recurring Bills */}
               <div className="lg:col-span-5 space-y-4 sm:space-y-6 min-w-0">
                 <CategoryBudgetGauges categories={categories} transactions={transactions} />
-                <IOULedgerCard ious={ious} onRefresh={loadData} />
+                <IOULedgerCard
+                  ious={ious}
+                  onRefresh={loadData}
+                  onOpenSplitsHub={() => setActiveTab('splits')}
+                  defaultUpiId={settings?.upiId}
+                  onSaveUpiId={async (upi) => {
+                    await db.app_settings.update('global', { upiId: upi });
+                    loadData();
+                  }}
+                />
                 <RecurringBillsCard bills={bills} onRefresh={loadData} />
               </div>
             </div>
@@ -453,7 +469,16 @@ function DashboardContent() {
         {activeTab === 'transactions' && (
           <div className="space-y-4 sm:space-y-6 min-w-0 w-full">
             <RecurringBillsCard bills={bills} onRefresh={loadData} />
-            <IOULedgerCard ious={ious} onRefresh={loadData} />
+            <IOULedgerCard
+              ious={ious}
+              onRefresh={loadData}
+              onOpenSplitsHub={() => setActiveTab('splits')}
+              defaultUpiId={settings?.upiId}
+              onSaveUpiId={async (upi) => {
+                await db.app_settings.update('global', { upiId: upi });
+                loadData();
+              }}
+            />
             <RecentTransactions
               transactions={transactions}
               categories={categories}
@@ -463,7 +488,22 @@ function DashboardContent() {
           </div>
         )}
 
-        {/* Tab 3: Analytics & Trends */}
+        {/* Tab 3: Splits & IOU Recovery Hub */}
+        {activeTab === 'splits' && (
+          <div className="min-w-0 w-full">
+            <SplitsView
+              ious={ious}
+              onRefresh={loadData}
+              defaultUpiId={settings?.upiId}
+              onSaveUpiId={async (upi) => {
+                await db.app_settings.update('global', { upiId: upi });
+                loadData();
+              }}
+            />
+          </div>
+        )}
+
+        {/* Tab 4: Analytics & Trends */}
         {activeTab === 'analytics' && (
           <div className="min-w-0 w-full">
             <AnalyticsView

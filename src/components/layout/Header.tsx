@@ -17,6 +17,7 @@ import {
   Receipt,
   PiggyBank,
   TrendingUp,
+  Users,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { promptPWAInstall, isPWAInstalled } from '@/lib/pwa';
@@ -104,6 +105,7 @@ export function Header({
         </span>
       ),
     },
+    { id: 'splits', label: 'Splits', icon: <Users className="w-4 h-4" /> },
     { id: 'analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" /> },
     { id: 'savings', label: 'Goals', icon: <PiggyBank className="w-4 h-4" /> },
     { id: 'settings', label: 'Settings', icon: <SettingsIcon className="w-4 h-4" /> },
