@@ -4,9 +4,10 @@ import { getServiceSupabase } from '@/lib/supabase';
 export async function GET(req: NextRequest) {
   const forwardedHost = req.headers.get('x-forwarded-host');
   const forwardedProto = req.headers.get('x-forwarded-proto') || 'https';
+  const defaultOrigin = process.env.NEXT_PUBLIC_APP_URL || 'https://money-flow-lac.vercel.app';
   const origin = forwardedHost
     ? `${forwardedProto}://${forwardedHost}`
-    : new URL(req.url).origin;
+    : (new URL(req.url).origin || defaultOrigin);
 
   const { searchParams } = new URL(req.url);
   const code = searchParams.get('code');

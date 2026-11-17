@@ -137,7 +137,7 @@ To enable live cross-device sync and parent share links across phones:
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: *(Your Supabase Anon Key)*
    - `SUPABASE_SERVICE_ROLE_KEY`: *(Your Supabase Service Role Key)*
    - `MONEY_FLOW_API_KEY`: *(Your secure webhook key)*
-5. Click **Deploy**. Your app will be live on `https://your-app.vercel.app`!
+5. Click **Deploy**. Your app will be live on `https://money-flow-lac.vercel.app`!
 
 ---
 
@@ -152,7 +152,7 @@ Automate transaction capture the moment your bank sends an SMS or GPay/PhonePe p
    - **Actions:**
      - `Connectivity` -> `HTTP Request`:
        - **Request Method:** `POST`
-       - **URL:** `https://your-app.vercel.app/api/ingest-sms`
+       - **URL:** `https://money-flow-lac.vercel.app/api/ingest-sms`
        - **Content Type:** `application/json`
        - **Headers:** `X-API-Key: <your-webhook-secret-key>`
        - **Request Body:**

@@ -20,6 +20,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const getAppOrigin = (): string => {
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_APP_URL || 'https://money-flow-lac.vercel.app';
+};
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -130,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined,
+        emailRedirectTo: `${getAppOrigin()}/auth/callback`,
       },
     });
 
@@ -140,12 +147,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (!supabase) return { error: new Error('Supabase is not configured') };
-    if (typeof window === 'undefined') return { error: new Error('Window is not available') };
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${getAppOrigin()}/auth/callback`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -175,7 +181,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string) => {
     if (!supabase) return { error: { name: 'ConfigError', message: 'Supabase is not configured' } as AuthError };
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback?type=recovery` : undefined,
+      redirectTo: `${getAppOrigin()}/auth/callback?type=recovery`,
     });
     return { error };
   };

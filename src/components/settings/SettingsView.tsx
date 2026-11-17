@@ -70,7 +70,7 @@ export const SettingsView = memo(function SettingsView({
   const [newKeyword, setNewKeyword] = useState('');
   const [newRuleCatId, setNewRuleCatId] = useState(categories[0]?.id || 'cat-food');
 
-  const originUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const originUrl = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://money-flow-lac.vercel.app');
   const apiKey = settings?.apiKey || '';
 
   const handleRotateApiKey = async () => {

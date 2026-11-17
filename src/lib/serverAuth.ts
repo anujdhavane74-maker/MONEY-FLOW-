@@ -124,24 +124,34 @@ export async function authenticateApiRequest(
   };
 }
 
+const PRODUCTION_APP_URL = 'https://money-flow-lac.vercel.app';
+
 /**
  * Strict CORS origin verification. Restricts Access-Control-Allow-Origin to authorized app domains.
  */
 export function getSafeCorsHeaders(req: NextRequest): Record<string, string> {
   const requestOrigin = req.headers.get('origin');
-  const allowedUrl = process.env.NEXT_PUBLIC_APP_URL || '';
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL || PRODUCTION_APP_URL;
+  const normalizedConfigured = configuredUrl.replace(/\/$/, '');
 
   let allowedOrigin = '';
 
   if (requestOrigin) {
-    // If NEXT_PUBLIC_APP_URL is set, match against it
-    if (allowedUrl && (requestOrigin === allowedUrl || requestOrigin === allowedUrl.replace(/\/$/, ''))) {
+    const normalizedRequest = requestOrigin.replace(/\/$/, '');
+
+    // 1. Check against configured app URL or production URL
+    if (
+      normalizedRequest === normalizedConfigured ||
+      normalizedRequest === PRODUCTION_APP_URL
+    ) {
       allowedOrigin = requestOrigin;
     } else {
-      // Allow localhost in development
+      // 2. Allow localhost in development
       const isLocalhost =
         requestOrigin.startsWith('http://localhost:') ||
-        requestOrigin.startsWith('http://127.0.0.1:');
+        requestOrigin.startsWith('http://127.0.0.1:') ||
+        requestOrigin.startsWith('http://10.') ||
+        requestOrigin.startsWith('http://192.168.');
       if (isLocalhost) {
         allowedOrigin = requestOrigin;
       }
@@ -149,7 +159,7 @@ export function getSafeCorsHeaders(req: NextRequest): Record<string, string> {
   }
 
   return {
-    'Access-Control-Allow-Origin': allowedOrigin || (allowedUrl || 'null'),
+    'Access-Control-Allow-Origin': allowedOrigin || normalizedConfigured || PRODUCTION_APP_URL,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization, X-Signature-SHA256',
     'Access-Control-Max-Age': '86400',

@@ -24,12 +24,12 @@ const securityHeaders = [
   {
     key: 'Content-Security-Policy',
     value: [
-      "default-src 'self'",
+      "default-src 'self' https://money-flow-lac.vercel.app",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://money-flow-lac.vercel.app",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+      "connect-src 'self' https://money-flow-lac.vercel.app https://*.supabase.co wss://*.supabase.co",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

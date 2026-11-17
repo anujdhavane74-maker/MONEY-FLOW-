@@ -30,7 +30,7 @@ export function MacroDroidGuideModal({
   const [simulating, setSimulating] = useState(false);
   const [simSuccess, setSimSuccess] = useState(false);
 
-  const originUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  const originUrl = typeof window !== 'undefined' && window.location?.origin ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'https://money-flow-lac.vercel.app');
   const endpointUrl = `${originUrl}/api/ingest-sms`;
 
   const copyUrl = () => {
