@@ -272,6 +272,22 @@ export async function POST(req: NextRequest) {
           await supabase.from('ious').upsert(iouRows, { onConflict: 'id' });
         }
 
+        // Upsert Categories
+        if (categories && categories.length > 0) {
+          const categoryRows = categories.map((c: any) => ({
+            id: c.id,
+            user_id: effectiveUserId,
+            name: c.name,
+            type: c.type,
+            icon: c.icon || null,
+            color: c.color || null,
+            budget_monthly: c.budgetMonthly || null,
+            is_default: Boolean(c.isDefault),
+            created_at: new Date().toISOString(),
+          }));
+          await supabase.from('categories').upsert(categoryRows, { onConflict: 'id' });
+        }
+
         supabaseSynced = true;
       } catch (sbErr) {
         if (process.env.NODE_ENV !== 'production') {

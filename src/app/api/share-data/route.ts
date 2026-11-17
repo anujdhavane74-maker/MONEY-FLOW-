@@ -51,14 +51,16 @@ export async function GET(req: NextRequest) {
       try {
         const { data: tokenRows } = await supabase
           .from('parent_share_tokens')
-          .select('token, label, revoked')
+          .select('token, user_id, label, revoked')
           .eq('revoked', false);
 
+        let tokenUserId: string | null = null;
         if (tokenRows && Array.isArray(tokenRows)) {
           for (const row of tokenRows) {
             if (timingSafeEqualString(row.token, token)) {
               isAuthorized = true;
               tokenLabel = row.label || 'Guardian View';
+              tokenUserId = row.user_id || null;
               break;
             }
           }
@@ -66,21 +68,33 @@ export async function GET(req: NextRequest) {
 
         if (isAuthorized) {
           // Get privacy setting
-          const { data: settingsData } = await supabase
+          let settingsQuery = supabase
             .from('app_settings')
-            .select('hide_notes_from_parent')
-            .eq('id', 'global')
-            .maybeSingle();
+            .select('hide_notes_from_parent');
+
+          if (tokenUserId) {
+            settingsQuery = settingsQuery.eq('user_id', tokenUserId);
+          } else {
+            settingsQuery = settingsQuery.eq('id', 'global');
+          }
+
+          const { data: settingsData } = await settingsQuery.maybeSingle();
 
           if (settingsData) {
             hideNotes = Boolean(settingsData.hide_notes_from_parent);
           }
 
           // Fetch transactions
-          const { data: txData } = await supabase
+          let txQuery = supabase
             .from('transactions')
             .select('*')
             .order('timestamp', { ascending: false });
+
+          if (tokenUserId) {
+            txQuery = txQuery.eq('user_id', tokenUserId);
+          }
+
+          const { data: txData } = await txQuery;
 
           if (txData && Array.isArray(txData)) {
             transactions = txData.map((row: any) => ({
