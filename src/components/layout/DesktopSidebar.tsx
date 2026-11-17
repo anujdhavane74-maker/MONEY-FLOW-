@@ -106,26 +106,26 @@ export function DesktopSidebar({
   ];
 
   return (
-    <aside className="hidden lg:flex w-64 h-screen sticky top-0 flex-col bg-white dark:bg-slate-950 border-r border-slate-200/90 dark:border-slate-800/80 shrink-0 select-none z-30 transition-colors">
+    <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 h-dvh overflow-hidden flex-col justify-between bg-white dark:bg-slate-950 border-r border-slate-200/90 dark:border-slate-800/80 shrink-0 select-none z-30 transition-colors">
       {/* Brand Header */}
-      <div className="p-5 pb-3">
+      <div className="p-4 pb-2 shrink-0">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 flex items-center justify-center shadow-xs">
-              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-lg font-mono">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500/20 via-cyan-500/20 to-blue-500/20 border border-emerald-500/30 flex items-center justify-center shadow-xs shrink-0">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 text-base font-mono">
                 {curProfile.symbol}
               </span>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
+                <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-sm">
                   Money Flow
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
                   VAULT
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
                 {curProfile.code} ({curProfile.symbol})
               </p>
             </div>
@@ -136,7 +136,7 @@ export function DesktopSidebar({
         <button
           type="button"
           onClick={onOpenCommandPalette}
-          className="mt-4 w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/70 dark:bg-slate-900 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 transition-colors text-xs font-medium"
+          className="mt-3 w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/70 dark:bg-slate-900 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 transition-colors text-xs font-medium"
         >
           <span className="flex items-center gap-2">
             <Command className="w-3.5 h-3.5 text-slate-500" />
@@ -151,15 +151,15 @@ export function DesktopSidebar({
         <button
           type="button"
           onClick={onOpenAddModal}
-          className="mt-2.5 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-sm shadow-emerald-500/20 active:scale-[0.98] transition-all"
+          className="mt-2 w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-xs shadow-emerald-500/20 active:scale-[0.98] transition-all"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Add Transaction</span>
         </button>
       </div>
 
       {/* Main Navigation Items */}
-      <nav className="flex-1 px-3 py-2 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-1 space-y-0.5 overflow-y-auto scrollbar-none min-h-0">
         <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           Navigation
         </div>
@@ -171,7 +171,7 @@ export function DesktopSidebar({
               key={item.id}
               type="button"
               onClick={() => onChangeTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                 isActive
                   ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100/70 dark:hover:bg-slate-900/50'
@@ -194,16 +194,16 @@ export function DesktopSidebar({
           );
         })}
 
-        <div className="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="pt-2 pb-0.5 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
           Fast Capture
         </div>
         {onOpenScanAndPayModal && (
           <button
             type="button"
             onClick={onOpenScanAndPayModal}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
           >
-            <QrCode className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <QrCode className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Scan & Pay UPI</span>
           </button>
         )}
@@ -211,42 +211,42 @@ export function DesktopSidebar({
           <button
             type="button"
             onClick={onOpenQuickLogSheet}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
           >
-            <Zap className="w-4 h-4 text-amber-500" />
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
             <span>1-Sec Quick Numpad</span>
           </button>
         )}
         <button
           type="button"
           onClick={onOpenVoiceModal}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors"
         >
-          <Mic className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+          <Mic className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
           <span>Speak Expense (NLP)</span>
         </button>
         {onOpenReconcileModal && (
           <button
             type="button"
             onClick={onOpenReconcileModal}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors"
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors"
           >
-            <Scale className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <Scale className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
             <span>Reconcile Balance</span>
           </button>
         )}
         <button
           type="button"
           onClick={onOpenImportModal}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
         >
-          <FileSpreadsheet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          <FileSpreadsheet className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
           <span>Import CSV / PDF</span>
         </button>
       </nav>
 
       {/* Footer Controls & User Account */}
-      <div className="p-3 border-t border-slate-200/90 dark:border-slate-800/80 space-y-2">
+      <div className="p-3 border-t border-slate-200/90 dark:border-slate-800/80 space-y-2 shrink-0">
         {/* User Profile Card */}
         <div className="p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -284,7 +284,7 @@ export function DesktopSidebar({
         </div>
 
         {/* Quick Utility Actions Row */}
-        <div className="flex items-center justify-between pt-1 text-xs">
+        <div className="flex items-center justify-between pt-0.5 text-xs">
           <button
             type="button"
             onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}

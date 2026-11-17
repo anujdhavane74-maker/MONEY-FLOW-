@@ -35,7 +35,7 @@ export const SummaryCards = React.memo(function SummaryCards({
   return (
     <div className="grid grid-cols-2 gap-2.5 sm:gap-4 h-full min-w-0 w-full">
       {/* 1. Current Balance Card */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
         <div className="flex items-center justify-between gap-1.5 mb-1.5">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 truncate">
@@ -72,7 +72,7 @@ export const SummaryCards = React.memo(function SummaryCards({
       </div>
 
       {/* 2. Total Income Card */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
         <div className="flex items-center justify-between gap-1.5 mb-1.5">
           <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 truncate">
             Income
@@ -93,7 +93,7 @@ export const SummaryCards = React.memo(function SummaryCards({
       </div>
 
       {/* 3. Total Spent Card */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
         <div className="flex items-center justify-between gap-1.5 mb-1.5">
           <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 truncate">
             Spent
@@ -114,7 +114,7 @@ export const SummaryCards = React.memo(function SummaryCards({
       </div>
 
       {/* 4. Total Saved Card */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
         <div className="flex items-center justify-between gap-1.5 mb-1.5">
           <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 truncate">
             Saved

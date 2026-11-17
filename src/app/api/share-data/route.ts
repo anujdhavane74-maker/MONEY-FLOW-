@@ -186,6 +186,7 @@ export async function GET(req: NextRequest) {
         status: 200,
         headers: {
           ...corsHeaders,
+          'Cache-Control': 'private, s-maxage=15, stale-while-revalidate=60',
           'X-RateLimit-Limit': String(rateCheck.limit),
           'X-RateLimit-Remaining': String(rateCheck.remaining),
         },

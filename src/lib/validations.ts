@@ -45,7 +45,7 @@ export const transactionSchema = z.object({
   bankOrApp: z.string().max(100).optional().transform((val) => (val ? sanitizeString(val) : undefined)),
   upiRefId: z.string().max(100).optional().transform((val) => (val ? sanitizeString(val) : undefined)),
   timestamp: z.number().int().positive(),
-  source: z.enum(['manual', 'sms', 'gpay_csv', 'gpay_pdf', 'webhook']),
+  source: z.enum(['manual', 'sms', 'gpay_csv', 'gpay_pdf', 'webhook', 'scan_pay', 'quick_log']),
   notes: z.string().max(500).optional().transform((val) => (val ? sanitizeString(val) : undefined)),
   isCategorized: z.boolean(),
   isSplit: z.boolean().optional(),

@@ -65,11 +65,24 @@ export async function pullUnsyncedFromCloud(): Promise<Transaction[]> {
 }
 
 /**
- * Push current local state to cloud server so /share/[token] and backup reflect latest state
+ * Push current local state to cloud server so /share/[token] and backup reflect latest state.
+ * Uses windowed querying (current month + 60 days) to prevent megabyte-scale payload bottlenecks.
  */
-export async function pushToCloud(): Promise<boolean> {
+export async function pushToCloud(fullHistory: boolean = false): Promise<boolean> {
   try {
-    const transactions = await db.transactions.toArray();
+    let transactions: Transaction[];
+    if (fullHistory) {
+      transactions = await db.transactions.toArray();
+    } else {
+      // 60-day active window
+      const cutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
+      transactions = await db.transactions.where('timestamp').aboveOrEqual(cutoff).toArray();
+      // If none found in cutoff, pull latest 100
+      if (transactions.length === 0) {
+        transactions = await db.transactions.orderBy('timestamp').reverse().limit(100).toArray();
+      }
+    }
+
     const categories = await db.categories.toArray();
     const settings = await db.app_settings.get('global');
     const recurringBills = await db.recurring_bills.toArray();
@@ -107,13 +120,38 @@ export async function pushToCloud(): Promise<boolean> {
   }
 }
 
+// 1500ms trailing debounce queue to coalesce rapid taps & edits
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+let pendingResolvers: ((val: boolean) => void)[] = [];
+
+/**
+ * Debounced push to cloud: batches rapid mutations into a single network sync.
+ */
+export function queueDebouncedSync(delayMs: number = 1500): Promise<boolean> {
+  return new Promise((resolve) => {
+    pendingResolvers.push(resolve);
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+    debounceTimer = setTimeout(async () => {
+      debounceTimer = null;
+      const success = await pushToCloud(false);
+      const resolvers = pendingResolvers;
+      pendingResolvers = [];
+      for (const res of resolvers) {
+        res(success);
+      }
+    }, delayMs);
+  });
+}
+
 /**
  * Complete bidirectional sync
  */
 export async function performFullSync(): Promise<SyncResult> {
   try {
     const newTxns = await pullUnsyncedFromCloud();
-    const pushed = await pushToCloud();
+    const pushed = await pushToCloud(false);
 
     return {
       success: pushed,

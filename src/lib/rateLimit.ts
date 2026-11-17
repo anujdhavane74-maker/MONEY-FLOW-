@@ -3,21 +3,36 @@ import { NextRequest } from 'next/server';
 interface RateLimitRecord {
   count: number;
   resetAt: number;
+  lastSeen: number;
 }
 
-// In-memory token bucket per IP address
+// Bounded in-memory store to prevent memory leaks under 10k+ concurrent requests
+const MAX_IP_STORE_ENTRIES = 10000;
 const ipStore = new Map<string, RateLimitRecord>();
 
-// Clean up expired records every 5 minutes to prevent memory leak
+// Cleanup stale IP entries
+function evictStaleEntries(now: number) {
+  for (const [ip, record] of ipStore.entries()) {
+    if (now > record.resetAt) {
+      ipStore.delete(ip);
+    }
+  }
+
+  // If still above threshold, perform LRU eviction based on lastSeen
+  if (ipStore.size > MAX_IP_STORE_ENTRIES) {
+    const sorted = [...ipStore.entries()].sort((a, b) => a[1].lastSeen - b[1].lastSeen);
+    const toRemove = sorted.slice(0, Math.floor(MAX_IP_STORE_ENTRIES * 0.2));
+    for (const [ip] of toRemove) {
+      ipStore.delete(ip);
+    }
+  }
+}
+
+// Periodic cleanup interval for long-lived processes
 if (typeof setInterval !== 'undefined') {
   setInterval(() => {
-    const now = Date.now();
-    for (const [ip, record] of ipStore.entries()) {
-      if (now > record.resetAt) {
-        ipStore.delete(ip);
-      }
-    }
-  }, 5 * 60 * 1000);
+    evictStaleEntries(Date.now());
+  }, 3 * 60 * 1000);
 }
 
 export interface RateLimitResult {
@@ -28,7 +43,7 @@ export interface RateLimitResult {
 }
 
 /**
- * In-memory sliding rate limiter per client IP
+ * High-performance sliding-window rate limiter with bounded memory footprint
  * @param req NextRequest
  * @param limit Max requests allowed in window
  * @param windowMs Window duration in milliseconds (default: 60,000ms = 1 minute)
@@ -43,12 +58,19 @@ export function checkRateLimit(
   const ip = forwarded?.split(',')[0].trim() || realIp || '127.0.0.1';
 
   const now = Date.now();
+
+  // Inline opportunistic eviction if store grows past threshold
+  if (ipStore.size > MAX_IP_STORE_ENTRIES) {
+    evictStaleEntries(now);
+  }
+
   const record = ipStore.get(ip);
 
   if (!record || now > record.resetAt) {
     ipStore.set(ip, {
       count: 1,
       resetAt: now + windowMs,
+      lastSeen: now,
     });
     return {
       success: true,
@@ -57,6 +79,8 @@ export function checkRateLimit(
       reset: Math.ceil((now + windowMs) / 1000),
     };
   }
+
+  record.lastSeen = now;
 
   if (record.count >= limit) {
     return {

@@ -114,6 +114,7 @@ ALTER TABLE transactions ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT
 ALTER TABLE transactions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 CREATE INDEX IF NOT EXISTS idx_transactions_user_timestamp ON transactions (user_id, timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_category ON transactions (user_id, category);
 CREATE INDEX IF NOT EXISTS idx_transactions_user_created ON transactions (user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_timestamp ON transactions (timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions (category);
@@ -159,11 +160,16 @@ CREATE TABLE IF NOT EXISTS ious (
 );
 
 ALTER TABLE ious ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE ious ADD COLUMN IF NOT EXISTS creditor_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE ious ADD COLUMN IF NOT EXISTS debtor_user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE ious ADD COLUMN IF NOT EXISTS settlement_status TEXT DEFAULT 'pending';
 ALTER TABLE ious ADD COLUMN IF NOT EXISTS transaction_id TEXT;
 ALTER TABLE ious ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE ious ADD COLUMN IF NOT EXISTS settled_at TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS idx_ious_user_status ON ious (user_id, status);
+CREATE INDEX IF NOT EXISTS idx_ious_creditor_status ON ious (creditor_user_id, settlement_status);
+CREATE INDEX IF NOT EXISTS idx_ious_debtor_status ON ious (debtor_user_id, settlement_status);
 CREATE INDEX IF NOT EXISTS idx_ious_transaction_id ON ious (transaction_id);
 
 -- ==============================================================================

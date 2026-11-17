@@ -1,6 +1,6 @@
 export type TransactionType = 'income' | 'expense' | 'savings';
 
-export type TransactionSource = 'manual' | 'sms' | 'gpay_csv' | 'gpay_pdf' | 'webhook';
+export type TransactionSource = 'manual' | 'sms' | 'gpay_csv' | 'gpay_pdf' | 'webhook' | 'scan_pay' | 'quick_log';
 
 export interface SplitFriend {
   name: string;

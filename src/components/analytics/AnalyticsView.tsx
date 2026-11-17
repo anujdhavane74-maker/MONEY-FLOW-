@@ -292,7 +292,7 @@ export function AnalyticsView({
       {/* 4 KPI Hero Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 min-w-0">
         {/* Card 1: Net Savings & Rate */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xs min-w-0 overflow-hidden space-y-1">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] min-w-0 overflow-hidden space-y-1">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Net Savings</span>
             <PiggyBank className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -307,7 +307,7 @@ export function AnalyticsView({
         </div>
 
         {/* Card 2: Daily Burn Velocity */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xs min-w-0 overflow-hidden space-y-1">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] min-w-0 overflow-hidden space-y-1">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Burn Velocity</span>
             <Flame className="w-4 h-4 text-rose-600 dark:text-rose-400" />
@@ -319,7 +319,7 @@ export function AnalyticsView({
         </div>
 
         {/* Card 3: Projected Spend */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xs min-w-0 overflow-hidden space-y-1">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] min-w-0 overflow-hidden space-y-1">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Est. Month-End</span>
             <Zap className="w-4 h-4 text-amber-500" />
@@ -331,7 +331,7 @@ export function AnalyticsView({
         </div>
 
         {/* Card 4: Total Inflow */}
-        <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-xs min-w-0 overflow-hidden space-y-1">
+        <div className="p-3.5 sm:p-5 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] min-w-0 overflow-hidden space-y-1">
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Total Inflow</span>
             <ArrowUpRight className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
@@ -346,7 +346,7 @@ export function AnalyticsView({
       {/* Main Charts Bento Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 min-w-0 items-start">
         {/* Left Column (7 cols): Cash Flow Trend Chart */}
-        <div className="lg:col-span-7 p-4 sm:p-6 rounded-3xl bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4 min-w-0 overflow-hidden">
+        <div className="lg:col-span-7 p-4 sm:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] space-y-4 min-w-0 overflow-hidden">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">

@@ -52,7 +52,7 @@ import {
   clearUnlockSession,
 } from '@/lib/sessionAuth';
 import { setActiveCurrency } from '@/lib/formatters';
-import { Sparkles, MessageSquareText, ShieldAlert } from 'lucide-react';
+import { Sparkles, MessageSquareText, ShieldAlert, QrCode } from 'lucide-react';
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -365,8 +365,8 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col lg:flex-row transition-colors w-full max-w-full overflow-x-clip min-w-0">
-      {/* Desktop Sidebar (visible on lg: >=1024px) */}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col transition-colors w-full max-w-full overflow-x-clip min-w-0">
+      {/* Fixed Non-Scrolling Desktop Sidebar (Pinned on lg: >=1024px) */}
       <DesktopSidebar
         activeTab={activeTab}
         onChangeTab={(t) => setActiveTab(t)}
@@ -385,8 +385,8 @@ function DashboardContent() {
         pendingIousCount={ious.filter((i) => i.status === 'pending').length}
       />
 
-      {/* Main App Canvas */}
-      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-clip">
+      {/* Main App Workspace (Offset by lg:pl-64 for pinned sidebar) */}
+      <div className="flex-1 flex flex-col min-w-0 w-full overflow-x-clip lg:pl-64">
         {/* Top Header */}
         <Header
           onLockApp={() => {
@@ -404,7 +404,7 @@ function DashboardContent() {
         />
 
         {/* Main Content Area */}
-        <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-12 space-y-4 sm:space-y-6 overflow-x-clip min-w-0">
+        <main className="flex-1 w-full max-w-7xl mx-auto px-3.5 sm:px-6 py-4 sm:py-6 pb-24 lg:pb-8 space-y-4 sm:space-y-6 overflow-x-clip min-w-0">
         {/* Uncategorized Prompt Notification Banner */}
         {uncategorizedCount > 0 && (
           <div className="p-3 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 flex items-center justify-between gap-3 text-xs animate-fade-in shadow-xs min-w-0">
@@ -461,6 +461,40 @@ function DashboardContent() {
             <div className="w-full min-w-0 overflow-hidden">
               <QuickSpendsBar presets={presets} onLogged={loadData} />
             </div>
+
+            {/* Zero-Balance / First-Time Onboarding Prompt */}
+            {transactions.length === 0 && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs animate-fade-in shadow-xs min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white text-sm">Welcome to Money Flow Vault</p>
+                    <p className="text-slate-600 dark:text-slate-400 text-xs">
+                      Your vault is ready. Tap <strong>+ Add</strong>, scan any merchant UPI QR, or paste a bank SMS to log your first spend.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setShowScanAndPayModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>Scan & Pay</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddModal(true)}
+                    className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-800 dark:text-slate-200 font-semibold text-xs border border-slate-200 dark:border-slate-700 transition-all"
+                  >
+                    + Add Transaction
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Main Body Bento: Left 7 Columns (Charts & Activity) + Right 5 Columns (Budgets, IOUs, Bills) */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4 lg:gap-6 items-start min-w-0 w-full">

@@ -62,7 +62,7 @@ export const DailySafeToSpend = React.memo(function DailySafeToSpend({
   };
 
   return (
-    <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none space-y-3.5 sm:space-y-4 flex flex-col justify-between h-full min-w-0 w-full overflow-hidden">
+    <div className="p-4 sm:p-5 lg:p-6 rounded-2xl bg-white/80 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-900/[0.08] dark:border-white/[0.08] shadow-[0_8px_30px_rgb(15,23,42,0.05)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.35)] space-y-3.5 sm:space-y-4 flex flex-col justify-between h-full min-w-0 w-full overflow-hidden">
       {/* Top Banner */}
       <div className="min-w-0">
         <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3 min-w-0">
