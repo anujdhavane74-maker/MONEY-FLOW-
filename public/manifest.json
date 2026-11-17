@@ -1,5 +1,5 @@
 {
-  "name": "Money Flow — Personal Finance & Expense Tracker",
+  "name": "Money Flow",
   "short_name": "Money Flow",
   "description": "Offline-first personal finance tracker with automated SMS capture, statement reconciliation, and smart categorization.",
   "start_url": "/",
@@ -12,10 +12,28 @@
   "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-192.png",
@@ -24,7 +42,7 @@
       "purpose": "any"
     },
     {
-      "src": "/icon-192.png",
+      "src": "/icon-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
@@ -40,6 +58,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "share_target": {
@@ -57,28 +81,28 @@
       "short_name": "Quick Log",
       "description": "Log chai, snacks or auto in 1 second",
       "url": "/?action=quick-log",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "📷 Scan & Pay UPI",
       "short_name": "Scan & Pay",
       "description": "Scan merchant QR, auto-log and launch UPI app",
       "url": "/?action=scan-pay",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "🎤 Voice Expense",
       "short_name": "Voice",
       "description": "Speak your expense with hands-free voice NLP",
       "url": "/?action=voice",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
       "name": "Quick Add Transaction",
       "short_name": "Add",
       "description": "Full income or expense modal",
       "url": "/?action=add",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

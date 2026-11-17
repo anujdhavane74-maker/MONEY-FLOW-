@@ -10,12 +10,14 @@ export function middleware(req: NextRequest) {
     pathname.startsWith('/auth') ||
     pathname.startsWith('/share') ||
     pathname.startsWith('/icons') ||
+    pathname.startsWith('/.well-known') ||
+    pathname === '/manifest.json' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname === '/favicon.ico' ||
+    pathname === '/sw.js' ||
     pathname === '/login' ||
     pathname === '/signup' ||
-    pathname === '/onboarding' ||
-    pathname === '/favicon.ico' ||
-    pathname === '/manifest.webmanifest' ||
-    pathname === '/sw.js'
+    pathname === '/onboarding'
   ) {
     return NextResponse.next();
   }
@@ -43,5 +45,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|\\.well-known|icons).*)'],
 };
