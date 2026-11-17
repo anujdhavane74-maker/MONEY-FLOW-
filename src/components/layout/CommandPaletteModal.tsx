@@ -18,6 +18,9 @@ import {
   X,
   CreditCard,
   Users,
+  QrCode,
+  Zap,
+  Scale,
 } from 'lucide-react';
 import { TabType } from './BottomNav';
 import { Transaction } from '@/lib/types';
@@ -28,6 +31,9 @@ interface CommandPaletteModalProps {
   onClose: () => void;
   onNavigate: (tab: TabType) => void;
   onOpenAdd: () => void;
+  onOpenScanAndPay?: () => void;
+  onOpenQuickLog?: () => void;
+  onOpenReconcile?: () => void;
   onOpenVoice: () => void;
   onOpenImport: () => void;
   onOpenQuickPaste: () => void;
@@ -50,6 +56,9 @@ export function CommandPaletteModal({
   onClose,
   onNavigate,
   onOpenAdd,
+  onOpenScanAndPay,
+  onOpenQuickLog,
+  onOpenReconcile,
   onOpenVoice,
   onOpenImport,
   onOpenQuickPaste,
@@ -70,6 +79,42 @@ export function CommandPaletteModal({
   }, [isOpen]);
 
   const commandItems: CommandItem[] = useMemo(() => [
+    {
+      id: 'cmd-scan-pay',
+      title: 'Scan & Pay UPI QR',
+      subtitle: 'Scan merchant QR, auto-log expense & launch Google Pay / PhonePe',
+      icon: <QrCode className="w-4 h-4 text-emerald-500" />,
+      shortcut: 'Q',
+      category: 'Actions',
+      action: () => {
+        onClose();
+        if (onOpenScanAndPay) onOpenScanAndPay();
+      },
+    },
+    {
+      id: 'cmd-quick-log',
+      title: '1-Second Quick Numpad',
+      subtitle: 'Fastest way to log chai, vadapav, auto & daily micro-spends',
+      icon: <Zap className="w-4 h-4 text-amber-500" />,
+      shortcut: 'N',
+      category: 'Actions',
+      action: () => {
+        onClose();
+        if (onOpenQuickLog) onOpenQuickLog();
+      },
+    },
+    {
+      id: 'cmd-reconcile',
+      title: 'Reconcile Bank / UPI Lite Balance',
+      subtitle: 'Detect and auto-adjust unaccounted micro-spends against real bank balance',
+      icon: <Scale className="w-4 h-4 text-cyan-500" />,
+      shortcut: 'R',
+      category: 'Actions',
+      action: () => {
+        onClose();
+        if (onOpenReconcile) onOpenReconcile();
+      },
+    },
     {
       id: 'cmd-add',
       title: 'Add Transaction',

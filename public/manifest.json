@@ -53,17 +53,31 @@
   },
   "shortcuts": [
     {
-      "name": "Quick Add Transaction",
-      "short_name": "Add",
-      "description": "Log an income or expense",
-      "url": "/?action=add",
+      "name": "⚡ Quick Log Expense",
+      "short_name": "Quick Log",
+      "description": "Log chai, snacks or auto in 1 second",
+      "url": "/?action=quick-log",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Import GPay Statement",
-      "short_name": "Import",
-      "description": "Reconcile CSV or PDF statement",
-      "url": "/?action=import",
+      "name": "📷 Scan & Pay UPI",
+      "short_name": "Scan & Pay",
+      "description": "Scan merchant QR, auto-log and launch UPI app",
+      "url": "/?action=scan-pay",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "🎤 Voice Expense",
+      "short_name": "Voice",
+      "description": "Speak your expense with hands-free voice NLP",
+      "url": "/?action=voice",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Quick Add Transaction",
+      "short_name": "Add",
+      "description": "Full income or expense modal",
+      "url": "/?action=add",
       "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]

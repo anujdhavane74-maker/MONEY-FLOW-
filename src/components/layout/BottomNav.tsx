@@ -13,6 +13,8 @@ import {
   Mic,
   TrendingUp,
   Users,
+  QrCode,
+  Zap,
 } from 'lucide-react';
 
 export type TabType = 'dashboard' | 'transactions' | 'splits' | 'analytics' | 'savings' | 'settings';
@@ -21,6 +23,8 @@ interface BottomNavProps {
   activeTab: TabType;
   onChangeTab: (tab: TabType) => void;
   onOpenAddModal: () => void;
+  onOpenScanAndPayModal?: () => void;
+  onOpenQuickLogSheet?: () => void;
   onOpenImportModal: () => void;
   onOpenQuickPasteModal: () => void;
   onOpenVoiceModal?: () => void;
@@ -31,6 +35,8 @@ export function BottomNav({
   activeTab,
   onChangeTab,
   onOpenAddModal,
+  onOpenScanAndPayModal,
+  onOpenQuickLogSheet,
   onOpenImportModal,
   onOpenQuickPasteModal,
   onOpenVoiceModal,
@@ -63,7 +69,55 @@ export function BottomNav({
               </button>
             </div>
 
-            {/* Option 0: Speak Expense (Voice NLP) */}
+            {/* Option 0: Scan & Pay UPI QR Launcher */}
+            {onOpenScanAndPayModal && (
+              <button
+                onClick={() => {
+                  setShowAddMenu(false);
+                  onOpenScanAndPayModal();
+                }}
+                className="w-full min-h-[48px] p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700/60 flex items-center gap-3.5 transition-all text-left shadow-xs"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <QrCode className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">Scan & Pay UPI (Camera)</p>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold">
+                      Auto-Log
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Scan QR, auto-log expense & open GPay / PhonePe</p>
+                </div>
+              </button>
+            )}
+
+            {/* Option 0.5: 1-Second Quick Numpad for Micro-Spends */}
+            {onOpenQuickLogSheet && (
+              <button
+                onClick={() => {
+                  setShowAddMenu(false);
+                  onOpenQuickLogSheet();
+                }}
+                className="w-full min-h-[48px] p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/50 flex items-center gap-3.5 transition-all text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                  <Zap className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">1-Second Quick Numpad</p>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">
+                      Chai & Auto
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Fast micro-spend logger under 1.5 seconds</p>
+                </div>
+              </button>
+            )}
+
+            {/* Option 1: Speak Expense (Voice NLP) */}
             {onOpenVoiceModal && (
               <button
                 onClick={() => {
@@ -73,13 +127,13 @@ export function BottomNav({
                 className="w-full min-h-[48px] p-3.5 rounded-2xl bg-cyan-50 dark:bg-gradient-to-r dark:from-cyan-950/40 dark:to-slate-800/80 hover:bg-cyan-100/80 dark:hover:bg-slate-800 border border-cyan-200 dark:border-cyan-800/50 flex items-center gap-3.5 transition-all text-left"
               >
                 <div className="w-10 h-10 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                  <Mic className="w-5 h-5 animate-pulse" />
+                  <Mic className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-bold text-slate-900 dark:text-white">Speak Expense (Voice NLP)</p>
                     <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-bold">
-                      Zero Friction
+                      Hands-Free
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400">&ldquo;Spent 120 on cold coffee&rdquo;</p>

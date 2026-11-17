@@ -21,6 +21,9 @@ import {
   WifiOff,
   User as UserIcon,
   Users,
+  QrCode,
+  Zap,
+  Scale,
 } from 'lucide-react';
 import { TabType } from './BottomNav';
 import { useAuth } from '@/lib/authContext';
@@ -31,6 +34,9 @@ interface DesktopSidebarProps {
   activeTab: TabType;
   onChangeTab: (tab: TabType) => void;
   onOpenAddModal: () => void;
+  onOpenScanAndPayModal?: () => void;
+  onOpenQuickLogSheet?: () => void;
+  onOpenReconcileModal?: () => void;
   onOpenVoiceModal: () => void;
   onOpenImportModal: () => void;
   onOpenCommandPalette: () => void;
@@ -44,6 +50,9 @@ export function DesktopSidebar({
   activeTab,
   onChangeTab,
   onOpenAddModal,
+  onOpenScanAndPayModal,
+  onOpenQuickLogSheet,
+  onOpenReconcileModal,
   onOpenVoiceModal,
   onOpenImportModal,
   onOpenCommandPalette,
@@ -186,16 +195,46 @@ export function DesktopSidebar({
         })}
 
         <div className="pt-3 pb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-          Shortcuts
+          Fast Capture
         </div>
+        {onOpenScanAndPayModal && (
+          <button
+            type="button"
+            onClick={onOpenScanAndPayModal}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors"
+          >
+            <QrCode className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span>Scan & Pay UPI</span>
+          </button>
+        )}
+        {onOpenQuickLogSheet && (
+          <button
+            type="button"
+            onClick={onOpenQuickLogSheet}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-amber-700 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+          >
+            <Zap className="w-4 h-4 text-amber-500" />
+            <span>1-Sec Quick Numpad</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onOpenVoiceModal}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-cyan-700 dark:hover:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors"
         >
-          <Mic className="w-4 h-4 text-cyan-600 dark:text-cyan-400 animate-pulse" />
+          <Mic className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
           <span>Speak Expense (NLP)</span>
         </button>
+        {onOpenReconcileModal && (
+          <button
+            type="button"
+            onClick={onOpenReconcileModal}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-teal-700 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-500/10 transition-colors"
+          >
+            <Scale className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <span>Reconcile Balance</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onOpenImportModal}

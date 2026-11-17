@@ -25,6 +25,7 @@ import {
   LogOut,
   CheckCircle2,
   QrCode,
+  Scale,
 } from 'lucide-react';
 import { AppSettings, MerchantRule, Category, Transaction } from '@/lib/types';
 import { db } from '@/lib/db';
@@ -42,6 +43,7 @@ interface SettingsViewProps {
   merchantRules: MerchantRule[];
   onOpenPinSettings: () => void;
   onRefresh: () => void;
+  onOpenReconcile?: () => void;
   onSimulateWebhook?: (txn: Transaction) => void;
 }
 
@@ -51,6 +53,7 @@ export const SettingsView = memo(function SettingsView({
   merchantRules,
   onOpenPinSettings,
   onRefresh,
+  onOpenReconcile,
   onSimulateWebhook,
 }: SettingsViewProps) {
   const [activeTab, setActiveTab] = useState<'account' | 'security' | 'share' | 'webhook' | 'rules' | 'data'>(
@@ -202,7 +205,7 @@ export const SettingsView = memo(function SettingsView({
           { key: 'account', label: 'Account & Currency', icon: Globe },
           { key: 'security', label: 'Security & PIN', icon: KeyRound },
           { key: 'share', label: 'Parent Links', icon: Share2 },
-          { key: 'webhook', label: 'SMS Webhook', icon: Smartphone },
+          { key: 'webhook', label: 'Advanced Webhook', icon: Smartphone },
           { key: 'rules', label: 'Auto-Rules', icon: Brain },
           { key: 'data', label: 'Backup & Vault', icon: Database },
         ].map((tab) => {
@@ -367,6 +370,31 @@ export const SettingsView = memo(function SettingsView({
               </button>
             </div>
           </div>
+
+          {/* Balance Reconciliation Card */}
+          {onOpenReconcile && (
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-3 transition-colors min-w-0 w-full">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div>
+                  <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Scale className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                    Reconcile Bank / UPI Lite Balance
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Compare your actual bank balance against Money Flow to catch unlogged chai, auto, and cash micro-spends.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onOpenReconcile}
+                  className="px-4 py-2 min-h-[38px] rounded-xl bg-gradient-to-r from-cyan-600 to-teal-500 hover:brightness-110 active:scale-95 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                >
+                  <Scale className="w-4 h-4" />
+                  <span>Open Balance Reconciler</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -554,14 +582,18 @@ export const SettingsView = memo(function SettingsView({
         </div>
       )}
 
-      {/* 3. MacroDroid / Tasker Webhook Guide */}
+      {/* 3. Advanced Webhook (Optional / Legacy SMS forwarder) */}
       {activeTab === 'webhook' && (
         <div className="p-6 rounded-3xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-lg space-y-5 transition-colors">
+          <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-xs text-amber-800 dark:text-amber-300">
+            <strong>💡 Pro-tip for Indian users:</strong> Indian banks no longer send SMS alerts for small transactions under ₹50. Use the native <strong>Scan & Pay UPI</strong> launcher or <strong>1-Sec Quick Numpad</strong> on your Home Screen for daily zero-friction capture! This webhook remains available for automated high-value SMS forwarding.
+          </div>
+
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Smartphone className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-                Automated SMS Sync Bridge (MacroDroid / Tasker)
+                Advanced SMS Webhook Bridge (Optional)
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Forwards bank SMS and UPI notifications in real-time with timing-safe webhook authentication.

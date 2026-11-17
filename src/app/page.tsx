@@ -22,6 +22,9 @@ import { PinLockScreen } from '@/components/auth/PinLockScreen';
 import { PinSettingsModal } from '@/components/auth/PinSettingsModal';
 import { QuickCategorizeSheet } from '@/components/transactions/QuickCategorizeSheet';
 import { AddTransactionModal } from '@/components/transactions/AddTransactionModal';
+import { ScanAndPayModal } from '@/components/transactions/ScanAndPayModal';
+import { QuickLogSheet } from '@/components/transactions/QuickLogSheet';
+import { ReconcileBalanceModal } from '@/components/dashboard/ReconcileBalanceModal';
 import { QuickSmsPasteModal } from '@/components/transactions/QuickSmsPasteModal';
 import { GPayImporterModal } from '@/components/importer/GPayImporterModal';
 import { SavingsGoalsView } from '@/components/savings/SavingsGoalsView';
@@ -72,6 +75,9 @@ function DashboardContent() {
 
   // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showScanAndPayModal, setShowScanAndPayModal] = useState(false);
+  const [showQuickLogSheet, setShowQuickLogSheet] = useState(false);
+  const [showReconcileModal, setShowReconcileModal] = useState(false);
   const [showQuickPasteModal, setShowQuickPasteModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showPinSettingsModal, setShowPinSettingsModal] = useState(false);
@@ -184,6 +190,14 @@ function DashboardContent() {
 
     if (action === 'add') {
       setShowAddModal(true);
+    } else if (action === 'quick-log') {
+      setShowQuickLogSheet(true);
+    } else if (action === 'scan-pay') {
+      setShowScanAndPayModal(true);
+    } else if (action === 'voice') {
+      setShowVoiceModal(true);
+    } else if (action === 'reconcile') {
+      setShowReconcileModal(true);
     } else if (action === 'import') {
       setShowImportModal(true);
     }
@@ -347,6 +361,9 @@ function DashboardContent() {
         activeTab={activeTab}
         onChangeTab={(t) => setActiveTab(t)}
         onOpenAddModal={() => setShowAddModal(true)}
+        onOpenScanAndPayModal={() => setShowScanAndPayModal(true)}
+        onOpenQuickLogSheet={() => setShowQuickLogSheet(true)}
+        onOpenReconcileModal={() => setShowReconcileModal(true)}
         onOpenVoiceModal={() => setShowVoiceModal(true)}
         onOpenImportModal={() => setShowImportModal(true)}
         onOpenCommandPalette={() => setShowCommandPalette(true)}
@@ -370,6 +387,7 @@ function DashboardContent() {
           onOpenPinSettings={() => setShowPinSettingsModal(true)}
           onOpenParentShare={() => setActiveTab('settings')}
           onOpenVoiceModal={() => setShowVoiceModal(true)}
+          onOpenScanAndPay={() => setShowScanAndPayModal(true)}
           uncategorizedCount={uncategorizedCount}
           activeTab={activeTab}
           onChangeTab={(t) => setActiveTab(t)}
@@ -424,6 +442,7 @@ function DashboardContent() {
                   totalIncome={totalIncome}
                   totalExpense={totalExpense}
                   totalSavings={totalSavings}
+                  onOpenReconcile={() => setShowReconcileModal(true)}
                 />
               </div>
             </div>
@@ -532,6 +551,7 @@ function DashboardContent() {
               merchantRules={merchantRules}
               onOpenPinSettings={() => setShowPinSettingsModal(true)}
               onRefresh={loadData}
+              onOpenReconcile={() => setShowReconcileModal(true)}
               onSimulateWebhook={(txn) => {
                 loadData();
                 checkAutoSettlement(txn);
@@ -548,6 +568,8 @@ function DashboardContent() {
         activeTab={activeTab}
         onChangeTab={(t) => setActiveTab(t)}
         onOpenAddModal={() => setShowAddModal(true)}
+        onOpenScanAndPayModal={() => setShowScanAndPayModal(true)}
+        onOpenQuickLogSheet={() => setShowQuickLogSheet(true)}
         onOpenImportModal={() => setShowImportModal(true)}
         onOpenQuickPasteModal={() => setShowQuickPasteModal(true)}
         onOpenVoiceModal={() => setShowVoiceModal(true)}
@@ -626,12 +648,43 @@ function DashboardContent() {
         />
       )}
 
+      {/* Modal: Scan & Pay UPI QR Launcher */}
+      {showScanAndPayModal && (
+        <ScanAndPayModal
+          categories={categories}
+          onClose={() => setShowScanAndPayModal(false)}
+          onLogged={loadData}
+        />
+      )}
+
+      {/* Modal: 1-Second Quick Numpad for Micro-Spends */}
+      {showQuickLogSheet && (
+        <QuickLogSheet
+          categories={categories}
+          onClose={() => setShowQuickLogSheet(false)}
+          onLogged={loadData}
+        />
+      )}
+
+      {/* Modal: Reconcile Bank / UPI Lite Balance */}
+      {showReconcileModal && (
+        <ReconcileBalanceModal
+          calculatedBalance={currentBalance}
+          categories={categories}
+          onClose={() => setShowReconcileModal(false)}
+          onReconciled={loadData}
+        />
+      )}
+
       {/* Modal: Global Cmd/Ctrl+K Command Palette */}
       <CommandPaletteModal
         isOpen={showCommandPalette}
         onClose={() => setShowCommandPalette(false)}
         onNavigate={(tab) => setActiveTab(tab)}
         onOpenAdd={() => setShowAddModal(true)}
+        onOpenScanAndPay={() => setShowScanAndPayModal(true)}
+        onOpenQuickLog={() => setShowQuickLogSheet(true)}
+        onOpenReconcile={() => setShowReconcileModal(true)}
         onOpenVoice={() => setShowVoiceModal(true)}
         onOpenImport={() => setShowImportModal(true)}
         onOpenQuickPaste={() => setShowQuickPasteModal(true)}

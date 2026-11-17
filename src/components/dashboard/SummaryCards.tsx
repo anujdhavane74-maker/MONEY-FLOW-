@@ -17,6 +17,7 @@ interface SummaryCardsProps {
   totalIncome: number;
   totalExpense: number;
   totalSavings: number;
+  onOpenReconcile?: () => void;
 }
 
 export const SummaryCards = React.memo(function SummaryCards({
@@ -24,6 +25,7 @@ export const SummaryCards = React.memo(function SummaryCards({
   totalIncome,
   totalExpense,
   totalSavings,
+  onOpenReconcile,
 }: SummaryCardsProps) {
   const savingsRate =
     totalIncome > 0
@@ -35,9 +37,21 @@ export const SummaryCards = React.memo(function SummaryCards({
       {/* 1. Current Balance Card */}
       <div className="p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900/70 border border-slate-200/90 dark:border-slate-800/80 shadow-sm shadow-slate-900/5 dark:shadow-none flex flex-col justify-between relative overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700 min-w-0">
         <div className="flex items-center justify-between gap-1.5 mb-1.5">
-          <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 truncate">
-            Net Balance
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 truncate">
+              Net Balance
+            </span>
+            {onOpenReconcile && (
+              <button
+                type="button"
+                onClick={onOpenReconcile}
+                className="px-1.5 py-0.5 rounded-md bg-cyan-100 hover:bg-cyan-200 dark:bg-cyan-950/80 dark:hover:bg-cyan-900/80 text-cyan-800 dark:text-cyan-300 text-[9px] font-bold transition-colors shrink-0"
+                title="Reconcile with actual bank balance"
+              >
+                ⚖️ Reconcile
+              </button>
+            )}
+          </div>
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
             <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>

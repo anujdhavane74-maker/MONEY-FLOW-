@@ -18,6 +18,7 @@ import {
   PiggyBank,
   TrendingUp,
   Users,
+  QrCode,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { promptPWAInstall, isPWAInstalled } from '@/lib/pwa';
@@ -31,6 +32,7 @@ interface HeaderProps {
   onOpenPinSettings: () => void;
   onOpenParentShare: () => void;
   onOpenVoiceModal?: () => void;
+  onOpenScanAndPay?: () => void;
   uncategorizedCount?: number;
   activeTab?: TabType;
   onChangeTab?: (tab: TabType) => void;
@@ -42,6 +44,7 @@ export function Header({
   onOpenPinSettings,
   onOpenParentShare,
   onOpenVoiceModal,
+  onOpenScanAndPay,
   uncategorizedCount = 0,
   activeTab = 'dashboard',
   onChangeTab,
@@ -184,6 +187,20 @@ export function Header({
 
         {/* Action Controls (Clean, single-row on mobile with 40x40px tap targets) */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Scan & Pay UPI QR Button */}
+          {onOpenScanAndPay && (
+            <button
+              onClick={onOpenScanAndPay}
+              type="button"
+              className="w-9 h-9 sm:w-auto sm:px-2.5 sm:py-1.5 min-w-[38px] min-h-[38px] rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-95"
+              title="Scan & Pay UPI QR Code"
+              aria-label="Scan & Pay UPI QR"
+            >
+              <QrCode className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span className="hidden sm:inline">Scan QR</span>
+            </button>
+          )}
+
           {/* Hands-Free Voice Input Button */}
           {onOpenVoiceModal && (
             <button
