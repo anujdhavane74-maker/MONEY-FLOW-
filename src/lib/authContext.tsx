@@ -32,18 +32,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // 1. Initial session load
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      if (initialSession?.user?.id) {
-        localStorage.setItem('mf_current_user_id', initialSession.user.id);
-      }
-      setLoading(false);
-    });
+    let isMounted = true;
 
-    // 2. Subscribe to auth changes
+    async function initializeAuth() {
+      if (!supabase) return;
+
+      // 1. Handle OAuth PKCE callback code if present in the browser URL
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const authCode = urlParams?.get('code');
+
+      if (authCode) {
+        try {
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(authCode);
+          if (!exchangeError && data?.session && isMounted) {
+            setSession(data.session);
+            setUser(data.session.user);
+            if (data.session.user?.id) {
+              localStorage.setItem('mf_current_user_id', data.session.user.id);
+            }
+
+            // Remove auth code parameters from the URL cleanly
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('code');
+            cleanUrl.searchParams.delete('sb_flow_id');
+            cleanUrl.searchParams.delete('error');
+            cleanUrl.searchParams.delete('error_description');
+            window.history.replaceState({}, '', cleanUrl.toString());
+
+            // Handle optional post-auth destination (e.g. /onboarding if initiated from signup)
+            const storedNext = localStorage.getItem('mf_auth_next');
+            if (storedNext) {
+              localStorage.removeItem('mf_auth_next');
+              if (storedNext !== window.location.pathname) {
+                window.location.href = storedNext;
+                return;
+              }
+            }
+          }
+        } catch (err) {
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn('OAuth code exchange in AuthProvider:', err);
+          }
+        }
+      }
+
+      // 2. Initial session load from storage / refresh
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (isMounted) {
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+          if (initialSession?.user?.id) {
+            localStorage.setItem('mf_current_user_id', initialSession.user.id);
+          }
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Failed to retrieve initial session:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    initializeAuth();
+
+    // 3. Subscribe to auth changes (SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      if (!isMounted) return;
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       if (currentSession?.user?.id) {
@@ -55,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [isConfigured]);
@@ -81,10 +140,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (!supabase) return { error: new Error('Supabase is not configured') };
+    if (typeof window === 'undefined') return { error: new Error('Window is not available') };
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : undefined,
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
     return { error };

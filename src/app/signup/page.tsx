@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Wallet,
   ShieldCheck,
@@ -19,9 +19,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/authContext';
 
-export default function SignUpPage() {
+function SignUpContent() {
   const router = useRouter();
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const searchParams = useSearchParams();
+  const { user, loading: authLoading, signUpWithEmail, signInWithGoogle } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +33,21 @@ export default function SignUpPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmationNotice, setConfirmationNotice] = useState(false);
+
+  // If already authenticated, redirect to onboarding or home
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/onboarding');
+    }
+  }, [user, authLoading, router]);
+
+  // Read error search parameters if redirected from OAuth callback
+  useEffect(() => {
+    const errorParam = searchParams.get('error') || searchParams.get('error_description');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+    }
+  }, [searchParams]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +89,9 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     setError(null);
     setGoogleLoading(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mf_auth_next', '/onboarding');
+    }
     const { error: googleErr } = await signInWithGoogle();
     if (googleErr) {
       setGoogleLoading(false);
@@ -102,50 +121,49 @@ export default function SignUpPage() {
           </div>
         </div>
 
-        {/* Value Proposition */}
+        {/* Value Proposition Highlights */}
         <div className="relative z-10 space-y-6 my-auto max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Join 10,000+ Smart Money Managers</span>
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Next-Gen Money Management</span>
+            </div>
+            <h1 className="text-4xl font-extrabold tracking-tight leading-tight text-white">
+              Your Private Financial OS. Built For Total Control.
+            </h1>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Real-time daily Safe-to-Spend limits, automated transaction categorization, multi-currency support, and zero third-party data tracking.
+            </p>
           </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tight leading-tight text-white">
-            Start Your Journey to Complete Financial Clarity.
-          </h1>
-
-          <ul className="space-y-3 text-sm text-slate-300">
-            <li className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <Check className="w-3 h-3" />
+          <div className="space-y-3 pt-2">
+            {[
+              '100% Client-Side Privacy with Salted PIN Hashing',
+              'MacroDroid & Tasker SMS Ingestion Webhook',
+              'Multi-Currency Engine: INR, USD, EUR, GBP, AED, SGD, JPY',
+              'Universal Statement Importer for Google Pay, Chase, Revolut',
+            ].map((feature, i) => (
+              <div key={i} className="flex items-center gap-2.5 text-xs text-slate-300">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Check className="w-3 h-3" />
+                </div>
+                <span>{feature}</span>
               </div>
-              <span>Daily Safe-to-Spend barometer dynamically updates with every chai & grocery.</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <Check className="w-3 h-3" />
-              </div>
-              <span>Automated MacroDroid bank SMS ingestion with zero server tracking.</span>
-            </li>
-            <li className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-                <Check className="w-3 h-3" />
-              </div>
-              <span>Mini-Splitwise IOU ledger with auto-settlement detection.</span>
-            </li>
-          </ul>
+            ))}
+          </div>
         </div>
 
-        {/* Security Footer */}
+        {/* Footer Metrics */}
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-500 border-t border-slate-900 pt-6 font-mono">
-          <span>Row-Level Security Active</span>
-          <span>Zero Plaintext Storage</span>
+          <span>Multi-Tenant PostgreSQL Isolation</span>
+          <span>Dexie.js Offline Cache</span>
         </div>
       </div>
 
       {/* Right Column: Centered Registration Form */}
       <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 min-h-screen">
         <div className="w-full max-w-md space-y-6">
-          {/* Mobile Header */}
+          {/* Mobile Brand Header */}
           <div className="lg:hidden flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-slate-950 font-black shadow-md">
               <Wallet className="w-5 h-5 text-slate-950" />
@@ -155,28 +173,29 @@ export default function SignUpPage() {
                 Money Flow
               </span>
               <span className="block text-[10px] tracking-widest uppercase text-slate-500 dark:text-slate-400 font-mono">
-                Global Vault
+                Create Account
               </span>
             </div>
           </div>
 
+          {/* Heading */}
           <div className="space-y-1.5">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Create Your Account
+              Create Your Vault
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              Set up your isolated multi-currency vault in 30 seconds.
+              Join thousands mastering their financial health with zero latency.
             </p>
           </div>
 
           {confirmationNotice ? (
-            <div className="p-5 rounded-3xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-200 space-y-3">
-              <div className="flex items-center gap-2.5 font-bold text-sm">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                <span>Verification Link Sent</span>
+            <div className="p-6 rounded-3xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-200 space-y-3 animate-fade-in">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                We sent a confirmation email to <strong className="text-slate-900 dark:text-white">{email}</strong>. Please click the link to activate your vault.
+              <h3 className="text-sm font-bold">Verification Email Sent</h3>
+              <p className="text-xs leading-relaxed text-emerald-800 dark:text-emerald-300">
+                We sent a secure activation link to <span className="font-bold underline">{email}</span>. Click the link to complete your vault activation.
               </p>
               <Link
                 href="/login"
@@ -229,43 +248,39 @@ export default function SignUpPage() {
                 </span>
               </div>
 
-              {/* Registration Form */}
+              {/* Email / Password Form */}
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Email Address
-                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
                   <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
+                      placeholder="you@domain.com"
                       required
+                      className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                     />
-                    <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Choose Password (min 6 characters)
-                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Create Password</label>
                   <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors font-mono"
+                      placeholder="Min. 6 characters"
                       required
+                      className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                     />
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -273,19 +288,17 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    Confirm Password
-                  </label>
+                  <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Confirm Password</label>
                   <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors font-mono"
+                      placeholder="Repeat password"
                       required
+                      className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                     />
-                    <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                   </div>
                 </div>
 
@@ -335,5 +348,19 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+          Loading sign-up...
+        </div>
+      }
+    >
+      <SignUpContent />
+    </Suspense>
   );
 }

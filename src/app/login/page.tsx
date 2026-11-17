@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Wallet,
   ShieldCheck,
@@ -19,9 +19,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/authContext';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
-  const { signInWithEmail, signInWithGoogle, resetPassword, isConfigured } = useAuth();
+  const searchParams = useSearchParams();
+  const { user, loading: authLoading, signInWithEmail, signInWithGoogle, resetPassword, isConfigured } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,6 +34,25 @@ export default function LoginPage() {
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetSent, setResetSent] = useState(false);
+
+  // If already authenticated, redirect to home
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/');
+    }
+  }, [user, authLoading, router]);
+
+  // Read error or message search parameters if redirected from OAuth callback
+  useEffect(() => {
+    const errorParam = searchParams.get('error') || searchParams.get('error_description');
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+    }
+    const messageParam = searchParams.get('message');
+    if (messageParam) {
+      setSuccess(decodeURIComponent(messageParam));
+    }
+  }, [searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +78,9 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setError(null);
     setGoogleLoading(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mf_auth_next', '/');
+    }
     const { error: googleErr } = await signInWithGoogle();
     if (googleErr) {
       setGoogleLoading(false);
@@ -215,60 +238,55 @@ export default function LoginPage() {
             <span>{googleLoading ? 'Connecting Google...' : 'Continue with Google'}</span>
           </button>
 
-          {/* Divider */}
           <div className="relative flex items-center justify-center">
             <div className="w-full border-t border-slate-200 dark:border-slate-800" />
             <span className="absolute bg-slate-50 dark:bg-slate-950 px-3 text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-              Or email & password
+              Or with email
             </span>
           </div>
 
           {/* Email / Password Form */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Email Address
-              </label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
               <div className="relative">
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
+                  placeholder="you@domain.com"
                   required
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                 />
-                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               </div>
             </div>
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Password
-                </label>
+                <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Password</label>
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(true)}
                   className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
-                  Forgot password?
+                  Forgot?
                 </button>
               </div>
               <div className="relative">
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors font-mono"
                   required
+                  className="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"
                 />
-                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -278,54 +296,55 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 min-h-[44px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 disabled:opacity-50"
+              className="w-full py-3 px-4 min-h-[44px] rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm shadow-emerald-500/20 active:scale-[0.99] transition-all disabled:opacity-50"
             >
               <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Links & Offline Demo Access */}
-          <div className="space-y-4 pt-2 text-center">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+          {/* Quick Offline Demo Bypass */}
+          <div className="pt-2 text-center">
+            <Link
+              href="/"
+              className="text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+            >
+              Continue without signing in (Local Offline Vault) →
+            </Link>
+          </div>
+
+          {/* Sign Up Redirect */}
+          <div className="text-center pt-2 border-t border-slate-200/80 dark:border-slate-800/80">
+            <p className="text-xs text-slate-500">
               Don&apos;t have an account?{' '}
               <Link href="/signup" className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline">
-                Create Account
+                Create one now
               </Link>
             </p>
-
-            <div className="pt-2 border-t border-slate-100 dark:border-slate-900">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
-              >
-                <Zap className="w-3.5 h-3.5 text-amber-500" />
-                <span>Continue as Local Guest / Offline Demo</span>
-              </Link>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Forgot Password Modal */}
       {showForgotModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
-          onClick={() => setShowForgotModal(false)}
-        >
-          <div
-            className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-2xl text-slate-900 dark:text-slate-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 className="text-base font-bold">Reset Password</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Enter your email address to receive password recovery instructions.
-            </p>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-4">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Reset Your Password</h3>
+            <p className="text-xs text-slate-500">Enter your email and we&apos;ll send a secure password recovery link.</p>
 
             {resetSent ? (
-              <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Recovery email sent! Please check your inbox.</span>
+              <div className="space-y-3">
+                <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>Check your inbox for the recovery link!</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold"
+                >
+                  Close
+                </button>
               </div>
             ) : (
               <form onSubmit={handlePasswordReset} className="space-y-3">
@@ -333,9 +352,9 @@ export default function LoginPage() {
                   type="email"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:border-emerald-500"
+                  placeholder="you@domain.com"
                   required
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white"
                 />
                 <div className="flex gap-2">
                   <button
@@ -359,5 +378,19 @@ export default function LoginPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+          Loading sign-in...
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
