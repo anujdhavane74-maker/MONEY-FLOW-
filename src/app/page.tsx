@@ -331,6 +331,16 @@ function DashboardContent() {
     .filter((t) => t.type === 'expense' && isToday(t.timestamp))
     .reduce((sum, t) => sum + t.amount, 0);
 
+  // Safe-to-Spend daily baseline calculation
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const currentDay = now.getDate();
+  const daysRemaining = Math.max(1, daysInMonth - currentDay + 1);
+  const netDiscretionary = Math.max(
+    0,
+    (settings?.monthlyBudget || 25000) - fixedRecurringToUse - totalExpense
+  );
+  const dailySafeLimit = Math.max(0, Math.round(netDiscretionary / daysRemaining));
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center text-slate-700 dark:text-slate-300 transition-colors">
@@ -652,6 +662,8 @@ function DashboardContent() {
       {showScanAndPayModal && (
         <ScanAndPayModal
           categories={categories}
+          dailySafeLimit={dailySafeLimit}
+          spentToday={spentToday}
           onClose={() => setShowScanAndPayModal(false)}
           onLogged={loadData}
         />
