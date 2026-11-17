@@ -46,173 +46,226 @@ export function BottomNav({
 
   return (
     <>
-      {/* Central Quick Action Dropup Overlay */}
+      {/* Central Quick Action Bottom Sheet Overlay */}
       {showAddMenu && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 dark:bg-black/75 backdrop-blur-sm animate-fade-in flex flex-col justify-end p-4 pb-24"
+          className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-sm animate-fade-in flex flex-col justify-end"
           onClick={() => setShowAddMenu(false)}
         >
           <div
-            className="w-full max-w-sm mx-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-2xl space-y-2 animate-slide-up"
+            className="w-full max-w-lg mx-auto bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-3xl shadow-2xl flex flex-col max-h-[75dvh] mt-14 overflow-hidden animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800 mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Log or Ingest Money
-              </span>
+            {/* Drag Handle Pill */}
+            <div className="pt-3 pb-1 flex justify-center shrink-0">
+              <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 dark:border-slate-800 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Quick Actions
+                </span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  Money Flow
+                </span>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowAddMenu(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
-                aria-label="Close add menu"
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                aria-label="Close action menu"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Option 0: Scan & Pay UPI QR Launcher */}
-            {onOpenScanAndPayModal && (
-              <button
-                onClick={() => {
-                  setShowAddMenu(false);
-                  onOpenScanAndPayModal();
-                }}
-                className="w-full min-h-[48px] p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 hover:bg-emerald-100/80 dark:hover:bg-emerald-900/40 border border-emerald-300 dark:border-emerald-700/60 flex items-center gap-3.5 transition-all text-left shadow-xs"
-              >
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                  <QrCode className="w-5 h-5 animate-pulse" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">Scan & Pay UPI (Camera)</p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 font-bold">
+            {/* Scrollable Sheet Content */}
+            <div className="overflow-y-auto px-4 py-3 space-y-3 pb-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))]">
+              {/* Top Hero Grid (2 Columns, grid-cols-2 gap-2.5) */}
+              <div className="grid grid-cols-2 gap-2.5 min-w-0">
+                {/* 1. Scan & Pay UPI */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    if (onOpenScanAndPayModal) onOpenScanAndPayModal();
+                    else onOpenAddModal();
+                  }}
+                  className="group relative p-3 rounded-2xl bg-emerald-50/70 hover:bg-emerald-100/80 dark:bg-emerald-950/25 dark:hover:bg-emerald-950/45 border border-emerald-200/80 dark:border-emerald-800/40 text-left transition-all active:scale-[0.98] min-w-0 flex flex-col justify-between shadow-xs"
+                >
+                  <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <QrCode className="w-4.5 h-4.5 animate-pulse" />
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-800 dark:text-emerald-300">
                       Auto-Log
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Scan QR, auto-log expense & open GPay / PhonePe</p>
-                </div>
-              </button>
-            )}
+                  <div className="mt-2.5 min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                      Scan & Pay UPI
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      Camera QR Scanner
+                    </p>
+                  </div>
+                </button>
 
-            {/* Option 0.5: 1-Second Quick Numpad for Micro-Spends */}
-            {onOpenQuickLogSheet && (
-              <button
-                onClick={() => {
-                  setShowAddMenu(false);
-                  onOpenQuickLogSheet();
-                }}
-                className="w-full min-h-[48px] p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/50 flex items-center gap-3.5 transition-all text-left"
-              >
-                <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">1-Second Quick Numpad</p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 font-bold">
+                {/* 2. Quick Numpad */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    if (onOpenQuickLogSheet) onOpenQuickLogSheet();
+                    else onOpenAddModal();
+                  }}
+                  className="group relative p-3 rounded-2xl bg-amber-50/70 hover:bg-amber-100/80 dark:bg-amber-950/25 dark:hover:bg-amber-950/45 border border-amber-200/80 dark:border-amber-800/40 text-left transition-all active:scale-[0.98] min-w-0 flex flex-col justify-between shadow-xs"
+                >
+                  <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                      <Zap className="w-4.5 h-4.5" />
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300">
                       Chai & Auto
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Fast micro-spend logger under 1.5 seconds</p>
-                </div>
-              </button>
-            )}
+                  <div className="mt-2.5 min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                      Quick Numpad
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      1.5s Micro-Spend
+                    </p>
+                  </div>
+                </button>
 
-            {/* Option 1: Speak Expense (Voice NLP) */}
-            {onOpenVoiceModal && (
-              <button
-                onClick={() => {
-                  setShowAddMenu(false);
-                  onOpenVoiceModal();
-                }}
-                className="w-full min-h-[48px] p-3.5 rounded-2xl bg-cyan-50 dark:bg-gradient-to-r dark:from-cyan-950/40 dark:to-slate-800/80 hover:bg-cyan-100/80 dark:hover:bg-slate-800 border border-cyan-200 dark:border-cyan-800/50 flex items-center gap-3.5 transition-all text-left"
-              >
-                <div className="w-10 h-10 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                  <Mic className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-bold text-slate-900 dark:text-white">Speak Expense (Voice NLP)</p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-bold">
+                {/* 3. Voice Expense */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    if (onOpenVoiceModal) onOpenVoiceModal();
+                    else onOpenAddModal();
+                  }}
+                  className="group relative p-3 rounded-2xl bg-cyan-50/70 hover:bg-cyan-100/80 dark:bg-cyan-950/25 dark:hover:bg-cyan-950/45 border border-cyan-200/80 dark:border-cyan-800/40 text-left transition-all active:scale-[0.98] min-w-0 flex flex-col justify-between shadow-xs"
+                >
+                  <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                      <Mic className="w-4.5 h-4.5" />
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-800 dark:text-cyan-300">
                       Hands-Free
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">&ldquo;Spent 120 on cold coffee&rdquo;</p>
-                </div>
-              </button>
-            )}
+                  <div className="mt-2.5 min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                      Voice Expense
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      Hands-Free NLP
+                    </p>
+                  </div>
+                </button>
 
-            {/* Option 1: Manual Transaction */}
-            <button
-              onClick={() => {
-                setShowAddMenu(false);
-                onOpenAddModal();
-              }}
-              className="w-full min-h-[48px] p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 flex items-center gap-3.5 transition-all text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                <Plus className="w-5 h-5" />
+                {/* 4. Add Manual */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    onOpenAddModal();
+                  }}
+                  className="group relative p-3 rounded-2xl bg-indigo-50/70 hover:bg-indigo-100/80 dark:bg-indigo-950/25 dark:hover:bg-indigo-950/45 border border-indigo-200/80 dark:border-indigo-800/40 text-left transition-all active:scale-[0.98] min-w-0 flex flex-col justify-between shadow-xs"
+                >
+                  <div className="flex items-center justify-between gap-1 w-full min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                      <Plus className="w-4.5 h-4.5" />
+                    </div>
+                    <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-800 dark:text-indigo-300">
+                      Manual
+                    </span>
+                  </div>
+                  <div className="mt-2.5 min-w-0">
+                    <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">
+                      Add Manual
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      Expense or Income
+                    </p>
+                  </div>
+                </button>
               </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Add Manual Transaction</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Expense, income, or split with friends</p>
-              </div>
-            </button>
 
-            {/* Option 2: Quick SMS / Notification Paste */}
-            <button
-              onClick={() => {
-                setShowAddMenu(false);
-                onOpenQuickPasteModal();
-              }}
-              className="w-full min-h-[48px] p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 flex items-center gap-3.5 transition-all text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                <MessageSquareText className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Paste Bank SMS / Notification</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Auto-parse amount, UPI Ref, and merchant</p>
-              </div>
-            </button>
-
-            {/* Option 3: Import GPay CSV / PDF */}
-            <button
-              onClick={() => {
-                setShowAddMenu(false);
-                onOpenImportModal();
-              }}
-              className="w-full min-h-[48px] p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 flex items-center gap-3.5 transition-all text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                <FileSpreadsheet className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Import Statement (CSV / PDF)</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Google Pay reconciliation with deduplication</p>
-              </div>
-            </button>
-
-            {/* Option 4: Sarcastic Split & IOU Hub */}
-            <button
-              onClick={() => {
-                setShowAddMenu(false);
-                onChangeTab('splits');
-              }}
-              className="w-full min-h-[48px] p-3.5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100/80 dark:hover:bg-cyan-900/40 border border-cyan-200 dark:border-cyan-800/50 flex items-center gap-3.5 transition-all text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 dark:bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">Splits & IOU Recovery Hub</p>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-100 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 font-bold">
+              {/* Secondary Compact Action Rows (Single-line h-12 rows below the grid) */}
+              <div className="space-y-2 min-w-0 pt-0.5">
+                {/* 5. Splits & IOU Recovery Hub */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    onChangeTab('splits');
+                  }}
+                  className="w-full h-12 px-3 rounded-xl bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2.5 transition-all active:scale-[0.99] text-left min-w-0"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0">
+                      <Users className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      Splits & IOU Recovery Hub
+                    </span>
+                  </div>
+                  <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
                     Roast 💸
                   </span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Collect pending debts with sarcastic cards</p>
+                </button>
+
+                {/* 6. Import GPay CSV / PDF */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    onOpenImportModal();
+                  }}
+                  className="w-full h-12 px-3 rounded-xl bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2.5 transition-all active:scale-[0.99] text-left min-w-0"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                      <FileSpreadsheet className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      Import GPay CSV / PDF
+                    </span>
+                  </div>
+                  <span className="shrink-0 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
+                    Statements
+                  </span>
+                </button>
+
+                {/* 7. Paste Bank SMS / Alert */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddMenu(false);
+                    onOpenQuickPasteModal();
+                  }}
+                  className="w-full h-12 px-3 rounded-xl bg-white dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2.5 transition-all active:scale-[0.99] text-left min-w-0"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                      <MessageSquareText className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
+                      Paste Bank SMS / Alert
+                    </span>
+                  </div>
+                  <span className="shrink-0 whitespace-nowrap text-[10px] font-medium px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                    Instant Parse
+                  </span>
+                </button>
               </div>
-            </button>
+            </div>
           </div>
         </div>
       )}
