@@ -17,13 +17,22 @@ export function registerServiceWorker() {
         .then((reg) => {
           console.log('[Money Flow PWA] Service Worker registered:', reg.scope);
 
-          // Listen for updates
+          // Proactively check for an updated service worker on every load
+          reg.update().catch(() => {});
+
+          // If a new worker is waiting, activate immediately
+          if (reg.waiting) {
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+
+          // Listen for new worker installation
           reg.addEventListener('updatefound', () => {
             const installing = reg.installing;
             if (installing) {
               installing.addEventListener('statechange', () => {
                 if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-                  console.log('[Money Flow PWA] New update available.');
+                  console.log('[Money Flow PWA] New update ready, activating immediately...');
+                  installing.postMessage({ type: 'SKIP_WAITING' });
                 }
               });
             }
@@ -32,6 +41,16 @@ export function registerServiceWorker() {
         .catch((err) => {
           console.error('[Money Flow PWA] Service Worker registration failed:', err);
         });
+
+      // Reload only once when a new service worker takes control
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          console.log('[Money Flow PWA] New service worker took control. Reloading for fresh assets...');
+          window.location.reload();
+        }
+      });
     });
 
     // Capture install prompt
@@ -67,3 +86,4 @@ export function isPWAInstalled(): boolean {
     (window.navigator as any).standalone === true
   );
 }
+

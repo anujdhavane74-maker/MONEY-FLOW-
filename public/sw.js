@@ -1,7 +1,6 @@
-// Money Flow PWA Service Worker (v1.0.0)
-const CACHE_NAME = 'money-flow-v1';
+// Money Flow PWA Service Worker (v2.0.0)
+const CACHE_NAME = 'money-flow-v2';
 const PRECACHE_ASSETS = [
-  '/',
   '/manifest.json',
   '/icon.svg',
   '/icon-192.png',
@@ -9,22 +8,26 @@ const PRECACHE_ASSETS = [
   '/favicon.ico'
 ];
 
-// Install: precache critical shell assets
+// Install: precache critical assets and skip waiting immediately
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS);
-    }).then(() => self.skipWaiting())
+      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+        console.warn('[SW] Precache non-critical error:', err);
+      });
+    })
   );
 });
 
-// Activate: cleanup stale caches
+// Activate: cleanup stale caches and claim clients immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('[SW] Purging outdated cache:', key);
             return caches.delete(key);
           }
         })
@@ -33,11 +36,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Message: allow clients to trigger skip waiting
+self.addEventListener('message', (event) => {
+  if (event.data && (event.data.type === 'SKIP_WAITING' || event.data === 'skipWaiting')) {
+    self.skipWaiting();
+  }
+});
+
 // Fetch: Stale-While-Revalidate for static assets, Network-First for navigation
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   
-  // Skip non-GET requests and browser-extension / chrome-extension requests
+  // Skip non-GET requests and cross-origin requests
   if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) {
     return;
   }
@@ -50,18 +60,49 @@ self.addEventListener('fetch', (event) => {
   // HTML Navigation: Network first, fall back to cached shell
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(async () => {
-        const cache = await caches.open(CACHE_NAME);
-        const cached = await cache.match('/');
-        return cached || new Response('Offline: Money Flow is ready offline.', {
-          headers: { 'Content-Type': 'text/html' }
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME);
+          const cached = await cache.match(request);
+          return cached || new Response('Offline: Money Flow is ready offline.', {
+            headers: { 'Content-Type': 'text/html' }
+          });
+        })
+    );
+    return;
+  }
+
+  // Next.js hashed static assets (/_next/static/...)
+  if (request.url.includes('/_next/static/')) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return networkResponse;
         });
       })
     );
     return;
   }
 
-  // Static assets (images, css, js, fonts): Cache-first with background network revalidation
+  // Other static assets (images, fonts, manifest): Cache-first with background revalidation
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       const fetchPromise = fetch(request).then((networkResponse) => {
